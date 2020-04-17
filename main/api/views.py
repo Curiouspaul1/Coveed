@@ -78,14 +78,14 @@ def signup():
     username = data['username']
     if username:
         try:
-            new_user = User(username=username,user_id=data['user_id'])
+            new_user = User(first_name=data['firstName'],last_name=data['lastName'],username=username,user_id=data['user_id'])
             if data['email']:
                 new_user.email = data['email']
             elif data['telephone']:
                 new_user.tel = data['telephone']
             db.session.add(new_user)
             db.session.commit()
-            return make_response(jsonify({"messsage":"Sign up successful"}),200)
+            return make_response(jsonify({"messsage":"Sign up successful"}),200)c
         except IntegrityError:
             return make_response(jsonify({"message":"Username already exists"}),401)
     return make_response("Invalid Entry, no username was sent",401)
