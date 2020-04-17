@@ -85,7 +85,7 @@ def signup():
                 new_user.tel = data['telephone']
             db.session.add(new_user)
             db.session.commit()
-            return make_response(jsonify({"messsage":"Sign up successful"}),200)c
+            return make_response(jsonify({"messsage":"Sign up successful"}),200)
         except IntegrityError:
             return make_response(jsonify({"message":"Username already exists"}),401)
     return make_response("Invalid Entry, no username was sent",401)
