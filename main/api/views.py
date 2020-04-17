@@ -9,7 +9,7 @@ from ..models import User,user_schema,users_schema,Symptoms,symptom_schema,sympt
 @api.route('/add_profile',methods=['POST'])
 def registeration():
     # user data
-    payload = request.get_json()
+    payload = request.get_json(force=True)
     name = payload[0]['name']
     email = payload[0]['email']
     tel = payload[0]['tel']
@@ -35,7 +35,7 @@ def registeration():
 
 @api.route('/add_symptoms',methods=['POST'])
 def add_symptoms():
-    data = request.get_json()
+    data = request.get_json(force=True)
     new_data = Symptoms(cough=data['cough'],resp=data['resp'],fever=data['fever'],fatigue=data['fatigue'],other=data['other'])
     
 
@@ -74,11 +74,11 @@ def user_symptoms(id):
 
 @api.route('/signup',methods=['POST'])
 def signup():
-    data = request.get_json()
+    data = request.get_json(force=True)
     username = data['username']
     if username:
         try:
-            new_user = User(first_name=data['firstName'],last_name=data['lastName'],username=username,user_id=data['user_id'])
+            new_user = User(username=username,user_id=data['user_id'])
             if data['email']:
                 new_user.email = data['email']
             elif data['telephone']:
