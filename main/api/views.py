@@ -78,7 +78,7 @@ def signup():
     username = data['username']
     if username:
         try:
-            new_user = User(username=username,user_id=data['user_id'])
+            new_user = User(first_name=data['firstName'],last_name=data['lastName'],username=username,user_id=data['user_id'])
             if data['email']:
                 new_user.email = data['email']
             elif data['telephone']:
