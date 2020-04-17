@@ -2,3 +2,4 @@ coveed/
 *__pycache__
 coveed-dev.sqlite
 .vscode/
+venv
