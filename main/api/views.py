@@ -22,6 +22,25 @@ def login(username):
 # registration route
 @api.route('/add_profile',methods=['PUT','POST'])
 def add_profile():
+    if request.method == "POST":
+        # symptoms
+        cough = payload[0]['cough']
+        resp = payload[0]['resp']
+        fever = payload[0]['fever']
+        fatigue = payload[0]['fatigue']
+        other = payload[0]['other']
+
+        cough_degree = payload[1]['coughDegree']
+        fever_degree = payload[1]['feverDegree']
+        fatigue_degree = payload[1]['fatigueDegree']
+        other_degree = payload[1]['otherDegree']
+        
+        symptoms = Symptoms(cough=cough,resp=resp,fever=fever,fatigue=fatigue,other=other)
+        specifics = Specifics(cough_degree=cough_degree,fever_degree=fever_degree,fatigue_degree=fatigue_degree,other_degree=other_degree,symptom=symptoms)
+
+        db.session.add_all([symptoms,specifics])
+        db.session.commit()
+        
     user = User.query.filter_by(user_id=session['user_id']).first()
     # user data
     payload = request.get_json(force=True)
