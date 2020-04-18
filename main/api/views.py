@@ -1,22 +1,38 @@
 from . import api
 import json
-from flask import request,make_response,jsonify,current_app,json
+from flask import request,make_response,jsonify,current_app,json,session
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
-from ..models import User,user_schema,users_schema,Symptoms,symptom_schema,symptoms_schema
+from ..models import User,user_schema,users_schema,Symptoms,symptom_schema,symptoms_schema,Specifics,specific_schema,specifics_schema
+
+
+@api.route('/login/<username>',methods=['GET','POST'])
+def login(username):
+    if request.method == 'GET':
+        user = User.query.filter_by(username=username).first()
+        if user:
+            return make_response(jsonify({"signup_method":user.sign_up_method}),200)
+        return make_response("No user with username found",401)
+    data = request.get_json()
+    user_id = data['user_id']
+    session['user_id'] = user_id
+    if user_id:
+        return make_response("Logged in successfully",200)
 
 # registration route
-@api.route('/add_profile',methods=['POST'])
-def registeration():
+@api.route('/add_profile',methods=['PUT','POST'])
+def add_profile():
+    user = User.query.filter_by(user_id=session['user_id']).first()
     # user data
     payload = request.get_json(force=True)
-    name = payload[0]['name']
-    email = payload[0]['email']
-    tel = payload[0]['tel']
-    country = payload[0]['country']
-    state = payload[0]['state']
-    address = payload[0]['address']
-    age = payload[0]['age']
+    email = payload['email']
+    tel = payload['tel']
+    country = payload['country']
+    state = payload['state']
+    address = payload['address']
+    age = payload['age']
+
+    user.
 
     # symptoms
     cough = payload[1]['cough']
@@ -24,11 +40,17 @@ def registeration():
     fever = payload[1]['fever']
     fatigue = payload[1]['fatigue']
     other = payload[1]['other']
+
+    cough_degree = payload[2]['coughDegree']
+    fever_degree = payload[2]['feverDegree']
+    fatigue_degree = payload[2]['fatigueDegree']
+    other_degree = payload[2]['otherDegree']
     
     symptoms = Symptoms(cough=cough,resp=resp,fever=fever,fatigue=fatigue,other=other)
-    patient = User(name=name,email=email,tel=tel,country=country,state=state,address=address,age=age,symptoms=symptoms)
+    #patient = User(email=email,tel=tel,country=country,state=state,address=address,age=age,symptoms=symptoms)
+    specifics = Specifics(cough_degree=cough_degree,fever_degree=fever_degree,fatigue_degree=fatigue_degree,other_degree=other_degree,symptom=symptoms)
 
-    db.session.add_all([patient,symptoms])
+    db.session.add_all([patient,symptoms,specifics])
     db.session.commit()
 
     return make_response(user_schema.jsonify(patient),200)
