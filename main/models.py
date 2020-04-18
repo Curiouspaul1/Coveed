@@ -23,6 +23,7 @@ class Symptoms(db.Model):
     fever = db.Column(db.Boolean,default=False)
     fatigue = db.Column(db.Boolean,default=False)
     other = db.Column(db.String(200))
+    date_added = db.Column(db.DateTime(), default=datetime.utcnow)
     user_id = db.Column(db.Integer,db.ForeignKey('user.id'))
 
 # schemas

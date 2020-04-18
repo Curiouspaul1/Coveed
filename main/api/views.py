@@ -68,7 +68,7 @@ def all_symptoms():
 
 @api.route('/user_symptoms/<id>',methods=['GET'])
 def user_symptoms(id):
-    user = User.query.filter_by(id=id).first()
+    user = User.query.filter_by(user_id=id).first()
     result = user.symptoms
     return symptom_schema.jsonify(result)
 
