@@ -40,7 +40,7 @@ def add_profile():
 
         db.session.add_all([symptoms,specifics])
         db.session.commit()
-        
+        return make_response("Added symptoms successfully",200)
     user = User.query.filter_by(user_id=session['user_id']).first()
     # user data
     payload = request.get_json(force=True)
@@ -51,28 +51,9 @@ def add_profile():
     address = payload['address']
     age = payload['age']
 
-    user.
-
-    # symptoms
-    cough = payload[1]['cough']
-    resp = payload[1]['resp']
-    fever = payload[1]['fever']
-    fatigue = payload[1]['fatigue']
-    other = payload[1]['other']
-
-    cough_degree = payload[2]['coughDegree']
-    fever_degree = payload[2]['feverDegree']
-    fatigue_degree = payload[2]['fatigueDegree']
-    other_degree = payload[2]['otherDegree']
-    
-    symptoms = Symptoms(cough=cough,resp=resp,fever=fever,fatigue=fatigue,other=other)
-    #patient = User(email=email,tel=tel,country=country,state=state,address=address,age=age,symptoms=symptoms)
-    specifics = Specifics(cough_degree=cough_degree,fever_degree=fever_degree,fatigue_degree=fatigue_degree,other_degree=other_degree,symptom=symptoms)
-
-    db.session.add_all([patient,symptoms,specifics])
+    user.email,user.tel,user.country,user.state,user.address,user.age = email,tel,country,state,address,age
     db.session.commit()
-
-    return make_response(user_schema.jsonify(patient),200)
+    return make_response("Profile updated successfully",200)
 
 @api.route('/add_symptoms',methods=['POST'])
 def add_symptoms():
