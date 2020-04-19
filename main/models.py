@@ -39,14 +39,14 @@ class Specifics(db.Model):
 # schemas
 class UserSchema(ma.Schema):
     class Meta:
-        fields = ('id','name','email','tel','country','state','address','age','sign_up_date')
+        fields = ('id','name','email','username','tel','country','state','address','age','sign_up_date','first_name','last_name','user_id')
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
 
 class SymptomSchema(ma.Schema):
     class Meta:
-        fields = ('id','cough','resp','fever','fatigue','other','user_id')
+        fields = ('id','cough','resp','fever','fatigue','other','user_id','date_added')
 
 symptom_schema = SymptomSchema()
 symptoms_schema = SymptomSchema(many=True)

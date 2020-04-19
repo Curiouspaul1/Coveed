@@ -1,6 +1,6 @@
 from . import api
 import json
-from flask import request,make_response,jsonify,current_app,json,session
+from flask import request,make_response,jsonify,current_app,json,session,g
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
 from ..models import User,user_schema,users_schema,Symptoms,symptom_schema,symptoms_schema,Specifics,specific_schema,specifics_schema
@@ -19,10 +19,18 @@ def login(username):
     if user_id:
         return make_response("Logged in successfully",200)
 
+#@api.before_request
+#def before_request():
+#g.user = None
+#if 'user_id' in session:
+#g.user = session['user_id']
+
 # registration route
 @api.route('/add_profile',methods=['PUT','POST'])
 def add_profile():
     if request.method == "POST":
+        payload = request.get_json(force=True)
+        user = User.query.filter_by(user_id=session['user_id']).first()
         # symptoms
         cough = payload[0]['cough']
         resp = payload[0]['resp']
@@ -35,7 +43,7 @@ def add_profile():
         fatigue_degree = payload[1]['fatigueDegree']
         other_degree = payload[1]['otherDegree']
         
-        symptoms = Symptoms(cough=cough,resp=resp,fever=fever,fatigue=fatigue,other=other)
+        symptoms = Symptoms(cough=cough,resp=resp,fever=fever,fatigue=fatigue,other=other,patient=user)
         specifics = Specifics(cough_degree=cough_degree,fever_degree=fever_degree,fatigue_degree=fatigue_degree,other_degree=other_degree,symptom=symptoms)
 
         db.session.add_all([symptoms,specifics])
@@ -91,8 +99,12 @@ def all_symptoms():
 @api.route('/user_symptoms/<id>',methods=['GET'])
 def user_symptoms(id):
     user = User.query.filter_by(user_id=id).first()
-    result = user.symptoms
-    return symptom_schema.jsonify(result)
+    result1 = user.symptoms
+    result2 = []
+    for i in result1:
+        result2.append(specific_schema.dump(Specifics.query.filter_by(symptom_id=i.id).first()))
+    return jsonify({"symptoms":symptoms_schema.dump(result1),"specs":result2})
+    
 
 @api.route('/signup',methods=['POST'])
 def signup():
@@ -100,7 +112,7 @@ def signup():
     username = data['username']
     if username:
         try:
-            new_user = User(first_name=data['firstName'],last_name=data['lastName'],username=username,user_id=data['user_id'])
+            new_user = User(first_name=data['firstName'],last_name=data['lastName'],username=username,user_id=data['user_id'],sign_up_method=data["signUpMethod"])
             if data['email']:
                 new_user.email = data['email']
             elif data['telephone']:
