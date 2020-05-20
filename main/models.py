@@ -99,7 +99,7 @@ class Guides(db.Model):
     name = db.Column(db.String(100))
     done = db.Column(db.Boolean,default=False,index=True)
     info = db.Column(db.PickleType())
-    time_lapse = db.Column(db.Datetime())
+    time_lapse = db.Column(db.DateTime())
 
     @staticmethod
     def insert_guides():
