@@ -13,10 +13,23 @@ class User(db.Model):
     age = db.Column(db.Integer)
     username = db.Column(db.String(100),unique=True)
     user_id = db.Column(db.String(100),unique=True)
-    sign_up_date = db.Column(db.DateTime(), default=d.datetime.utcnow())
+    sign_up_date = db.Column(db.DateTime())
     sign_up_method = db.Column(db.String(100))
+    med_state = db.Column(db.String(50),default="Quarantined")
+    days_left = db.Column(db.Integer)
     symptoms = db.relationship('Symptoms',backref='patient')
     role_id = db.Column(db.Integer,db.ForeignKey('role.id'))
+    guide_id = db.Column(db.Integer,db.ForeignKey('guides.id'))
+
+    def Crt(self):
+        # fetch first symptom date
+        sdate = self.symptoms[0].date_added 
+        t_lapse = sdate + d.timedelta(weeks=2)
+        remaining = t_lapse - self.symptoms[-1].date_added
+        self.days_left = remaining.days
+
+    #def reset_medstate:
+    #self.days_left
 
 #class Vitals(db.Model):
 
@@ -27,7 +40,7 @@ class Symptoms(db.Model):
     fever = db.Column(db.Boolean,default=False)
     fatigue = db.Column(db.Boolean,default=False)
     other = db.Column(db.String(200))
-    date_added = db.Column(db.DateTime(), default=d.datetime.utcnow())
+    date_added = db.Column(db.DateTime())
     user_id = db.Column(db.Integer,db.ForeignKey('user.id'))
     specifics = db.relationship('Specifics',backref='symptom',uselist=False)
 
@@ -100,6 +113,7 @@ class Guides(db.Model):
     done = db.Column(db.Boolean,default=False,index=True)
     info = db.Column(db.PickleType())
     time_lapse = db.Column(db.DateTime())
+    patients = db.relationship('User',backref='guide')
 
     @staticmethod
     def insert_guides():
@@ -112,27 +126,6 @@ class Guides(db.Model):
             guide = Guides.query.filter_by(name=g).first()
             if guide is None:
                 guide = Guides(name=g,info=guides[g])
-            db.session.add()
+            db.session.add(guide)
         db.session.commit()
             
-# schemas
-class UserSchema(ma.Schema):
-    class Meta:
-        fields = ('id','name','email','username','tel','country','state','address','age','sign_up_date','first_name','last_name','user_id')
-
-user_schema = UserSchema()
-users_schema = UserSchema(many=True)
-
-class SymptomSchema(ma.Schema):
-    class Meta:
-        fields = ('id','cough','resp','fever','fatigue','other','user_id','date_added')
-
-symptom_schema = SymptomSchema()
-symptoms_schema = SymptomSchema(many=True)
-
-class SpecificSchema(ma.Schema):
-    class Meta:
-        fields = ('id','cough_degree','fever_degree','fatigue_degree','other_degree','symptom_id')
-
-specific_schema = SpecificSchema()
-specifics_schema = SpecificSchema(many=True)
