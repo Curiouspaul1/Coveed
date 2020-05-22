@@ -28,6 +28,10 @@ class User(db.Model):
         remaining = t_lapse - self.symptoms[-1].date_added
         self.days_left = remaining.days
 
+    def __init__(self,**kwargs):
+        super(User, self).__init__(**kwargs)
+        self.guide = Guides.query.all()
+
     #def reset_medstate:
     #self.days_left
 
@@ -118,19 +122,19 @@ class Guides(db.Model):
     name = db.Column(db.String(100))
     done = db.Column(db.Boolean,default=False,index=True)
     info = db.Column(db.PickleType())
-    time_lapse = db.Column(db.DateTime())
+    time_lapse = db.Column(db.PickleType())
     patients = db.relationship('User',backref=db.backref('guide',lazy='dynamic'), secondary=patients)
 
     @staticmethod
     def insert_guides():
         guides = {
-            "Pain Medication":['Acetaminophen (Tylenol)',d.timedelta(hours=4)],
-            "Zinc Supplement":['Cold-Eeze lozenges',d.timedelta(hours=4)],
-            "Vitamin C":['Vitamin-C',d.timedelta(days=1)]
+            "Pain Medication":['Acetaminophen (Tylenol)','hours=4'],
+            "Zinc Supplement":['Cold-Eeze lozenges','hours=4'],
+            "Vitamin C":['Vitamin-C','days=1']
         }
         for g in guides:
             guide = Guides.query.filter_by(name=g).first()
             if guide is None:
-                guide = Guides(name=g,info=guides[g])
+                guide = Guides(name=g,info=guides[g][0],time_lapse=guides[g][1])
             db.session.add(guide)
         db.session.commit()
