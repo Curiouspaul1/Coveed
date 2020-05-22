@@ -107,13 +107,19 @@ class Role(db.Model):
             db.session.add(role)
         db.session.commit()
 
+# association table
+patients = db.Table('patients',
+db.Column('user_id', db.Integer,db.ForeignKey('user.id')),
+db.Column('guide_id', db.Integer, db.ForeignKey('guides.id'))
+)
+
 class Guides(db.Model):
     id = db.Column(db.Integer,primary_key=True,nullable=False)
     name = db.Column(db.String(100))
     done = db.Column(db.Boolean,default=False,index=True)
     info = db.Column(db.PickleType())
     time_lapse = db.Column(db.DateTime())
-    patients = db.relationship('User',backref='guide')
+    patients = db.relationship('User',backref=db.backref('guide',lazy='dynamic'), secondary=patients)
 
     @staticmethod
     def insert_guides():
@@ -128,4 +134,3 @@ class Guides(db.Model):
                 guide = Guides(name=g,info=guides[g])
             db.session.add(guide)
         db.session.commit()
-            

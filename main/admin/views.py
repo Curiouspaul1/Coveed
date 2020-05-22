@@ -3,10 +3,9 @@ from flask import request,make_response,jsonify,current_app,json,session,g
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
 from main.models import User,Symptoms,Specifics
+from . import admin
 
-
-
-@api.route('/delete_users',methods=['DELETE'])
+@admin.route('/delete_users',methods=['DELETE'])
 def delete_users():
     users = User.query.all()
     for i in users:
@@ -14,7 +13,7 @@ def delete_users():
         db.session.commit()
     return make_response("Deleted users"),200
 
-@api.route('/delete_symptoms',methods=['DELETE'])
+@admin.route('/delete_symptoms',methods=['DELETE'])
 def delete_symptoms():
     symptoms = Symptoms.query.all()
     for i in symptoms:
@@ -22,12 +21,12 @@ def delete_symptoms():
         db.session.commit()
     return make_response("Cleared symptoms"),200
 
-@api.route('/users',methods=['GET'])
+@admin.route('/users',methods=['GET'])
 def all_users():
     users = User.query.all()
     return jsonify(users_schema.dump(users))
 
-@api.route('/symptoms',methods=['GET'])
+@admin.route('/symptoms',methods=['GET'])
 def all_symptoms():
     symptoms = Symptoms.query.all()
     return jsonify(symptoms_schema.dump(symptoms))

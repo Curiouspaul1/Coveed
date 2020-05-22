@@ -67,7 +67,7 @@ def add_symptoms():
     user = User.query.filter_by(user_id=data[0]['user_id']).first()
     new_data = Symptoms(cough=data[1]['cough'],resp=data[1]['resp'],fever=data[1]['fever'],fatigue=data[1]['fatigue'],other=data[1]['other'],date_added=d.datetime.utcnow())
     new_data.patient = user
-    degrees = Specifics(cough_degree=data[2]['coughDegree'],fever_degree=data[2]['feverDegree'],fatigue_degree=data[2]['fatigueDegree'],other_degree=data[2]['otherDegree'])
+    degrees = Specifics(cough_degree=data[2]['coughDegree'],fever_degree=data[2]['feverDegree'],fatigue_degree=data[2]['fatigueDegree'],other_degree=data[2]['otherDegree'],symptom=new_data)
     db.session.add_all([new_data,degrees])
     user.Crt()
     db.session.commit()
@@ -108,3 +108,9 @@ def getuser(user_id):
     if not user:
         return make_response(jsonify({'msg':'No such user found'}),404)
     return user_schema.jsonify(user)
+
+@api.route('/fetch_user_symptoms/<user_id>')
+def fetchsymptoms(user_id):
+    user = User.query.filter_by(user_id=user_id).first()
+    result = user.symptoms
+    return jsonify(symptoms_schema.dump(result)),200
