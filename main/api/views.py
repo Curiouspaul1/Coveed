@@ -3,8 +3,10 @@ import json
 from flask import request,make_response,jsonify,current_app,json,session,g
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
-from ..models import User,user_schema,users_schema,Symptoms,symptom_schema,symptoms_schema,Specifics,specific_schema,specifics_schema
-
+from main.models import User,Symptoms,Specifics
+from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,specific_schema,specifics_schema
+from functools import wraps
+import datetime as d
 
 @api.route('/login/<username>',methods=['GET','POST'])
 def login(username):
@@ -15,10 +17,25 @@ def login(username):
         return make_response("No user with username found",401)
     data = request.get_json()
     user_id = data['user_id']
-    session['user_id'] = user_id
-    if user_id:
+    # find user with id
+    user = User.query.filter_by(user_id=user_id).first()
+    if user:
+        session['user_id'] = user_id
         return make_response("Logged in successfully",200)
+    return make_response(jsonify({'error':'no user with such id found'}),400)
 
+"""def login_required(f):
+    @wraps(f)
+    def function(*args,**kwargs):
+        user_id = None
+        if session['user_id']:
+            user_id = session['user_id']
+        else:
+            return make_response(jsonify({"error":"Please Login to continue"}),400)
+        current_user = User.query.filter_by(user_id=user_id).first()
+        return f(current_user,*args,**kwargs)
+    return function"""
+        
 #@api.before_request
 #def before_request():
 #g.user = None
@@ -26,32 +43,11 @@ def login(username):
 #g.user = session['user_id']
 
 # registration route
-@api.route('/add_profile',methods=['PUT','POST'])
+@api.route('/add_profile',methods=['PUT'])
 def add_profile():
-    if request.method == "POST":
-        payload = request.get_json(force=True)
-        user = User.query.filter_by(user_id=session['user_id']).first()
-        # symptoms
-        cough = payload[0]['cough']
-        resp = payload[0]['resp']
-        fever = payload[0]['fever']
-        fatigue = payload[0]['fatigue']
-        other = payload[0]['other']
-
-        cough_degree = payload[1]['coughDegree']
-        fever_degree = payload[1]['feverDegree']
-        fatigue_degree = payload[1]['fatigueDegree']
-        other_degree = payload[1]['otherDegree']
-        
-        symptoms = Symptoms(cough=cough,resp=resp,fever=fever,fatigue=fatigue,other=other,patient=user)
-        specifics = Specifics(cough_degree=cough_degree,fever_degree=fever_degree,fatigue_degree=fatigue_degree,other_degree=other_degree,symptom=symptoms)
-
-        db.session.add_all([symptoms,specifics])
-        db.session.commit()
-        return make_response("Added symptoms successfully",200)
-    user = User.query.filter_by(user_id=session['user_id']).first()
     # user data
     payload = request.get_json(force=True)
+    user = User.query.filter_by(user_id=payload['user_id']).first()
     email = payload['email']
     tel = payload['tel']
     country = payload['country']
@@ -61,39 +57,21 @@ def add_profile():
 
     user.email,user.tel,user.country,user.state,user.address,user.age = email,tel,country,state,address,age
     db.session.commit()
-    return make_response("Profile updated successfully",200)
+
+    return make_response(jsonify({"msg":"Profile updated successfully"}),200)
 
 @api.route('/add_symptoms',methods=['POST'])
 def add_symptoms():
     data = request.get_json(force=True)
-    new_data = Symptoms(cough=data['cough'],resp=data['resp'],fever=data['fever'],fatigue=data['fatigue'],other=data['other'])
-    
-
-@api.route('/delete_users',methods=['DELETE'])
-def delete_users():
-    users = User.query.all()
-    for i in users:
-        db.session.delete(i)
-        db.session.commit()
-    return make_response("Deleted users"),200
-
-@api.route('/delete_symptoms',methods=['DELETE'])
-def delete_symptoms():
-    symptoms = Symptoms.query.all()
-    for i in symptoms:
-        db.session.delete(i)
-        db.session.commit()
-    return make_response("Cleared symptoms"),200
-
-@api.route('/users',methods=['GET'])
-def all_users():
-    users = User.query.all()
-    return jsonify(users_schema.dump(users))
-
-@api.route('/symptoms',methods=['GET'])
-def all_symptoms():
-    symptoms = Symptoms.query.all()
-    return jsonify(symptoms_schema.dump(symptoms))
+    # fetch user 
+    user = User.query.filter_by(user_id=data[0]['user_id']).first()
+    new_data = Symptoms(cough=data[1]['cough'],resp=data[1]['resp'],fever=data[1]['fever'],fatigue=data[1]['fatigue'],other=data[1]['other'],date_added=d.datetime.utcnow())
+    new_data.patient = user
+    degrees = Specifics(cough_degree=data[2]['coughDegree'],fever_degree=data[2]['feverDegree'],fatigue_degree=data[2]['fatigueDegree'],other_degree=data[2]['otherDegree'],symptom=new_data)
+    db.session.add_all([new_data,degrees])
+    user.Crt()
+    db.session.commit()
+    return make_response(jsonify({'msg':'Added symptoms succesfully'}),200)
 
 
 @api.route('/user_symptoms/<id>',methods=['GET'])
@@ -123,3 +101,16 @@ def signup():
         except IntegrityError:
             return make_response(jsonify({"message":"Username already exists"}),401)
     return make_response("Invalid Entry, no username was sent",401)
+
+@api.route('/getuser/<user_id>')
+def getuser(user_id):
+    user = User.query.filter_by(user_id=user_id).first()
+    if not user:
+        return make_response(jsonify({'msg':'No such user found'}),404)
+    return user_schema.jsonify(user)
+
+@api.route('/fetch_user_symptoms/<user_id>')
+def fetchsymptoms(user_id):
+    user = User.query.filter_by(user_id=user_id).first()
+    result = user.symptoms
+    return jsonify(symptoms_schema.dump(result)),200

@@ -7,7 +7,7 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY")
 
 class DevelopmentConfig(Config):
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir,'coveed_dev.sqlite') or os.getenv('DEV_URI')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir,'dev.sqlite') or os.getenv('DEV_URI')
     DEBUG = True
 
 class TestingConfig(Config):
@@ -16,6 +16,7 @@ class TestingConfig(Config):
 
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    FLASK_ENV='development'
 
 
 config = {
