@@ -122,7 +122,7 @@ class Guides(db.Model):
     name = db.Column(db.String(100))
     done = db.Column(db.Boolean,default=False,index=True)
     info = db.Column(db.PickleType())
-    time_lapse = db.Column(db.PickleType())
+    time_lapse = db.Column(db.String(50))
     patients = db.relationship('User',backref=db.backref('guide',lazy='dynamic'), secondary=patients)
 
     @staticmethod
