@@ -5,23 +5,34 @@ from sqlalchemy.exc import IntegrityError
 from main.extensions import db
 from main.models import User,Symptoms,Specifics
 from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,specific_schema,specifics_schema
+from firebase_admin import auth
+import firebase_admin
 from functools import wraps
 import datetime as d
+import uuid
 
-@api.route('/login/<username>',methods=['GET','POST'])
+@api.route('/login',methods=['POST'])
 def login(username):
+    """
     if request.method == 'GET':
-        user = User.query.filter_by(username=username).first()
+        user = User.quer.filter_by(username=username).first()
         if user:
             return make_response(jsonify({"signup_method":user.sign_up_method}),200)
         return make_response("No user with username found",401)
+    """
     data = request.get_json()
-    user_id = data['user_id']
+    if 'access-token' in data:
+        token = data['access-token']
+        try:
+            decoded_token = auth.verify_id_token(token)
+        except:
+            return make_response(jsonify({'error':'An error occured while trying to decode token'}),500)
+        uid = decoded_token['uid']
     # find user with id
-    user = User.query.filter_by(user_id=user_id).first()
+    user = User.query.filter_by(user_id=uid).first()
     if user:
-        session['user_id'] = user_id
-        return make_response("Logged in successfully",200)
+        #session['user_id'] = user_id
+        return make_response(jsonify({'msg':'verified user successfully'}),200)
     return make_response(jsonify({'error':'no user with such id found'}),400)
 
 """def login_required(f):

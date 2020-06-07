@@ -1,5 +1,7 @@
 from flask import Flask
 from .extensions import db,ma,cors
+import firebase_admin
+from firebase_admin import credentials
 from config import config
 import os
 
@@ -10,6 +12,7 @@ def __call__(config_object):
 
     db.init_app(app)
     ma.init_app(app)
+    firebase_admin.initialize_app(config[config_object].cred)
     cors.init_app(app, resources={r"/api/*":{"origins":"*"}})
 
     # register blurprint
