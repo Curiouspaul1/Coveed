@@ -12,10 +12,7 @@ def __call__(config_object):
 
     db.init_app(app)
     ma.init_app(app)
-    if config_object == 'default' or 'development':
-        firebase_admin.initialize_app(config[config_object].cred)
-    else:
-        firebase_admin.initialize_app()
+    firebase_admin.initialize_app()
     cors.init_app(app, resources={r"/api/*":{"origins":"*"}})
 
     # register blurprint
