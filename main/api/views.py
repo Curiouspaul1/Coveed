@@ -12,7 +12,7 @@ import datetime as d
 import uuid
 
 @api.route('/login',methods=['POST'])
-def login(username):
+def login():
     """
     if request.method == 'GET':
         user = User.quer.filter_by(username=username).first()
