@@ -98,20 +98,18 @@ def user_symptoms(id):
 @api.route('/signup',methods=['POST'])
 def signup():
     data = request.get_json(force=True)
-    username = data['username']
-    if username:
+    if 'access-token' in data:
+        token = data['access-token']
+        decoded_token = auth.verify_id_token(token)
         try:
-            new_user = User(first_name=data['firstName'],last_name=data['lastName'],username=username,user_id=data['user_id'],sign_up_method=data["signUpMethod"])
-            if data['email']:
-                new_user.email = data['email']
-            elif data['telephone']:
+            new_user = User(first_name=data['firstName'],last_name=data['lastName'],user_id=decoded_token['uid'],sign_up_method=data["signUpMethod"])
+            if data['telephone']:
                 new_user.tel = data['telephone']
             db.session.add(new_user)
             db.session.commit()
             return make_response(jsonify({"messsage":"Sign up successful"}),200)
         except IntegrityError:
-            return make_response(jsonify({"message":"Username already exists"}),401)
-    return make_response("Invalid Entry, no username was sent",401)
+            return make_response(jsonify({"message":"User_id already exists"}),401)
 
 @api.route('/getuser/<user_id>')
 def getuser(user_id):

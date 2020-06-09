@@ -11,7 +11,6 @@ class User(db.Model):
     state = db.Column(db.String(50))
     address = db.Column(db.String(200))
     age = db.Column(db.Integer)
-    username = db.Column(db.String(100),unique=True)
     user_id = db.Column(db.String(100),unique=True)
     sign_up_date = db.Column(db.DateTime())
     sign_up_method = db.Column(db.String(100))

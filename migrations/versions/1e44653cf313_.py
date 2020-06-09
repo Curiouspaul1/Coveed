@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: f58e047915cf
+Revision ID: 1e44653cf313
 Revises: 
-Create Date: 2020-05-26 21:26:00.346516
+Create Date: 2020-06-09 01:20:40.255019
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f58e047915cf'
+revision = '1e44653cf313'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -45,7 +45,6 @@ def upgrade():
     sa.Column('state', sa.String(length=50), nullable=True),
     sa.Column('address', sa.String(length=200), nullable=True),
     sa.Column('age', sa.Integer(), nullable=True),
-    sa.Column('username', sa.String(length=100), nullable=True),
     sa.Column('user_id', sa.String(length=100), nullable=True),
     sa.Column('sign_up_date', sa.DateTime(), nullable=True),
     sa.Column('sign_up_method', sa.String(length=100), nullable=True),
@@ -56,8 +55,7 @@ def upgrade():
     sa.ForeignKeyConstraint(['guide_id'], ['guides.id'], ),
     sa.ForeignKeyConstraint(['role_id'], ['role.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('user_id'),
-    sa.UniqueConstraint('username')
+    sa.UniqueConstraint('user_id')
     )
     op.create_table('patients',
     sa.Column('user_id', sa.Integer(), nullable=True),

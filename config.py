@@ -1,4 +1,5 @@
 import os
+from firebase_admin import credentials
 
 basedir = os.getcwd()
 
@@ -7,7 +8,7 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY")
 
 class DevelopmentConfig(Config):
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir,'devsb.sqlite') or os.getenv('DEV_URI')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir,'coveed-dev.sqlite') or os.getenv('DEV_URI')
     DEBUG = True
     cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
 
