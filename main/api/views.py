@@ -61,7 +61,7 @@ def login_required(f):
 
 # registration route
 @api.route('/add_profile',methods=['PUT'])
-@login_required()
+@login_required
 def add_profile(current_user):
     # user data
     payload = request.get_json(force=True)
@@ -79,7 +79,7 @@ def add_profile(current_user):
     return make_response(jsonify({"msg":"Profile updated successfully"}),200)
 
 @api.route('/add_symptoms',methods=['POST'])
-@login_required()
+@login_required
 def add_symptoms(current_user):
     data = request.get_json(force=True)
     # fetch user 
@@ -94,7 +94,7 @@ def add_symptoms(current_user):
 
 
 @api.route('/user_symptoms',methods=['GET'])
-@login_required()
+@login_required
 def user_symptoms(current_user):
     user = User.query.filter_by(user_id=current_user.user_id).first()
     result1 = user.symptoms
@@ -121,7 +121,7 @@ def signup():
             return make_response(jsonify({"message":"User_id already exists"}),401)
 
 @api.route('/getuser')
-@login_required()
+@login_required
 def getuser(current_user):
     user = User.query.filter_by(user_id=current_user.user_id).first()
     if not user:
@@ -129,7 +129,7 @@ def getuser(current_user):
     return user_schema.jsonify(user)
 
 @api.route('/fetch_user_symptoms')
-@login_required()
+@login_required
 def fetchsymptoms(current_user):
     user = User.query.filter_by(user_id=current_user.user_id).first()
     result = user.symptoms
