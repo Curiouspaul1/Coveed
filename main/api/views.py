@@ -1,6 +1,6 @@
 from . import api
 import json
-from flask import request,make_response,jsonify,current_app,json,session,g
+from flask import request,make_response,jsonify,current_app,json,session,g,request
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
 from main.models import User,Symptoms,Specifics
@@ -35,17 +35,23 @@ def login(username):
         return make_response(jsonify({'msg':'verified user successfully'}),200)
     return make_response(jsonify({'error':'no user with such id found'}),400)
 
-"""def login_required(f):
+def login_required(f):
     @wraps(f)
     def function(*args,**kwargs):
-        user_id = None
-        if session['user_id']:
-            user_id = session['user_id']
+        token = None
+        if 'access-token' in request.headers:
+            token = request.headers['access-token']
         else:
-            return make_response(jsonify({"error":"Please Login to continue"}),400)
-        current_user = User.query.filter_by(user_id=user_id).first()
+            return make_response(jsonify({'error':'token not found'}),404)
+        try:
+            decoded_token = auth.verify_id_token(token)
+        except:
+            make_response(jsonify({'error':'Unable to validate token'}),500)
+
+        # find user with id
+        current_user = User.query.filter_by(user_id=decoded_token['uid']).first()
         return f(current_user,*args,**kwargs)
-    return function"""
+    return function
         
 #@api.before_request
 #def before_request():
@@ -55,10 +61,11 @@ def login(username):
 
 # registration route
 @api.route('/add_profile',methods=['PUT'])
-def add_profile():
+@login_required()
+def add_profile(current_user):
     # user data
     payload = request.get_json(force=True)
-    user = User.query.filter_by(user_id=payload['user_id']).first()
+    user = User.query.filter_by(user_id=current_user.user_id).first()
     email = payload['email']
     tel = payload['tel']
     country = payload['country']
@@ -72,10 +79,11 @@ def add_profile():
     return make_response(jsonify({"msg":"Profile updated successfully"}),200)
 
 @api.route('/add_symptoms',methods=['POST'])
-def add_symptoms():
+@login_required()
+def add_symptoms(current_user):
     data = request.get_json(force=True)
     # fetch user 
-    user = User.query.filter_by(user_id=data[0]['user_id']).first()
+    user = User.query.filter_by(user_id=current_user.user_id).first()
     new_data = Symptoms(cough=data[1]['cough'],resp=data[1]['resp'],fever=data[1]['fever'],fatigue=data[1]['fatigue'],other=data[1]['other'],date_added=d.datetime.utcnow())
     new_data.patient = user
     degrees = Specifics(cough_degree=data[2]['coughDegree'],fever_degree=data[2]['feverDegree'],fatigue_degree=data[2]['fatigueDegree'],other_degree=data[2]['otherDegree'],symptom=new_data)
@@ -85,9 +93,10 @@ def add_symptoms():
     return make_response(jsonify({'msg':'Added symptoms succesfully'}),200)
 
 
-@api.route('/user_symptoms/<id>',methods=['GET'])
-def user_symptoms(id):
-    user = User.query.filter_by(user_id=id).first()
+@api.route('/user_symptoms',methods=['GET'])
+@login_required()
+def user_symptoms(current_user):
+    user = User.query.filter_by(user_id=current_user.user_id).first()
     result1 = user.symptoms
     result2 = []
     for i in result1:
@@ -111,15 +120,17 @@ def signup():
         except IntegrityError:
             return make_response(jsonify({"message":"User_id already exists"}),401)
 
-@api.route('/getuser/<user_id>')
-def getuser(user_id):
-    user = User.query.filter_by(user_id=user_id).first()
+@api.route('/getuser')
+@login_required()
+def getuser(current_user):
+    user = User.query.filter_by(user_id=current_user.user_id).first()
     if not user:
         return make_response(jsonify({'msg':'No such user found'}),404)
     return user_schema.jsonify(user)
 
-@api.route('/fetch_user_symptoms/<user_id>')
-def fetchsymptoms(user_id):
-    user = User.query.filter_by(user_id=user_id).first()
+@api.route('/fetch_user_symptoms')
+@login_required()
+def fetchsymptoms(current_user):
+    user = User.query.filter_by(user_id=current_user.user_id).first()
     result = user.symptoms
     return jsonify(symptoms_schema.dump(result)),200
