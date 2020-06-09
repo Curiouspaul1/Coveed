@@ -10,7 +10,7 @@ class Config:
 class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir,'coveed-dev.sqlite') or os.getenv('DEV_URI')
     DEBUG = True
-    cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+    #cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
 
 class TestingConfig(Config):
     TESTING =True
