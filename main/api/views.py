@@ -7,6 +7,7 @@ from main.models import User,Symptoms,Specifics
 from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,specific_schema,specifics_schema
 from firebase_admin import auth
 import firebase_admin
+import jwt
 from functools import wraps
 import datetime as d
 import uuid
@@ -25,7 +26,9 @@ def login():
         token = data['access-token']
         try:
             decoded_token = auth.verify_id_token(token)
-        except:
+            ##decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
+        except Exception as e:
+            raise e
             return make_response(jsonify({'error':'An error occured while trying to decode token'}),500)
         uid = decoded_token['uid']
     # find user with id
@@ -41,15 +44,13 @@ def login_required(f):
         token = None
         if 'access-token' in request.headers:
             token = request.headers['access-token']
+            decoded_token = auth.verify_id_token(token)
+            #decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
         else:
             return make_response(jsonify({'error':'token not found'}),404)
-        try:
-            decoded_token = auth.verify_id_token(token)
-        except:
-            make_response(jsonify({'error':'Unable to validate token'}),500)
-
+        uid = decoded_token['uid']
         # find user with id
-        current_user = User.query.filter_by(user_id=decoded_token['uid']).first()
+        current_user = User.query.filter_by(user_id=uid).first()
         return f(current_user,*args,**kwargs)
     return function
         
@@ -84,9 +85,9 @@ def add_symptoms(current_user):
     data = request.get_json(force=True)
     # fetch user 
     user = User.query.filter_by(user_id=current_user.user_id).first()
-    new_data = Symptoms(cough=data[1]['cough'],resp=data[1]['resp'],fever=data[1]['fever'],fatigue=data[1]['fatigue'],other=data[1]['other'],date_added=d.datetime.utcnow())
+    new_data = Symptoms(cough=data[0]['cough'],resp=data[0]['resp'],fever=data[0]['fever'],fatigue=data[0]['fatigue'],other=data[0]['other'],date_added=d.datetime.utcnow())
     new_data.patient = user
-    degrees = Specifics(cough_degree=data[2]['coughDegree'],fever_degree=data[2]['feverDegree'],fatigue_degree=data[2]['fatigueDegree'],other_degree=data[2]['otherDegree'],symptom=new_data)
+    degrees = Specifics(cough_degree=data[1]['coughDegree'],fever_degree=data[1]['feverDegree'],fatigue_degree=data[1]['fatigueDegree'],other_degree=data[1]['otherDegree'],symptom=new_data)
     db.session.add_all([new_data,degrees])
     user.Crt()
     db.session.commit()
@@ -133,4 +134,7 @@ def getuser(current_user):
 def fetchsymptoms(current_user):
     user = User.query.filter_by(user_id=current_user.user_id).first()
     result = user.symptoms
+    import os,json
+    data = open(os.path.join(os.getcwd(),'data.json'),'w')
+    data.write(json.dumps(symptoms_schema.dump(result)))
     return jsonify(symptoms_schema.dump(result)),200
