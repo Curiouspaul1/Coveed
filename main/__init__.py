@@ -21,5 +21,8 @@ def __call__(config_object):
 
     from .admin import admin as admin_blueprint
     app.register_blueprint(admin_blueprint,url_prefix='/admin')
+
+    from .doctors import doctor as doc_blueprint
+    app.register_blueprint(doc_blueprint,url_prefix='/doctors')
     
     return app
