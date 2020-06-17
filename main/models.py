@@ -10,6 +10,7 @@ class User(db.Model):
     country = db.Column(db.String(50))
     state = db.Column(db.String(50))
     address = db.Column(db.String(200))
+    travel_history = db.Column(db.Boolean,default=False)
     age = db.Column(db.Integer)
     user_id = db.Column(db.String(100),unique=True)
     sign_up_date = db.Column(db.DateTime())
@@ -19,6 +20,7 @@ class User(db.Model):
     symptoms = db.relationship('Symptoms',backref='patient')
     role_id = db.Column(db.Integer,db.ForeignKey('role.id'))
     guide_id = db.Column(db.Integer,db.ForeignKey('guides.id'))
+    remarks = db.relationship('comments',backref='patient')
 
     def Crt(self):
         # fetch first symptom date
@@ -137,3 +139,18 @@ class Guides(db.Model):
                 guide = Guides(name=g,info=guides[g][0],time_lapse=guides[g][1])
             db.session.add(guide)
         db.session.commit()
+
+class Doctor(db.Model):
+    id = db.Column(db.Integer,primary_key=True,nullable=False)
+    first_name = db.Column(db.String(50))
+    last_name = db.Column(db.String(50))
+    qualification = db.Column(db.String(200))
+    docs = db.Column(db.String(500))
+    comments = db.relationship('Doctor',backref='remarks')
+
+class Comments(db.Model):
+    id = db.Column(db.Integer,primary_key=True,nullable=False)
+    content = db.Column(db.Text())
+    date_created = db.Column(db.DateTime())
+    doctor_id = db.Column(db.Integer,db.ForeignKey('doctor.id'))
+    user_id = db.Column(db.Integer,db.ForeignKey('user.id'))

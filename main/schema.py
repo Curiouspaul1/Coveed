@@ -31,4 +31,20 @@ class UserSchema(ma.Schema):
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
 
+class CommentSchema(ma.Schema):
+    class Meta:
+        fields = ('id','content','date_created','doctor_id','user_id')
+
+comment_schema = CommentSchema()
+comments_schema = CommentSchema(many=True)
+
+class DoctorSchema(ma.Schema):
+    class Meta:
+        fields = ('id','first_name','last_name','qualification','docs','comments')
+
+    comments = ma.Nested(CommentSchema)
+
+doc_schema = DoctorSchema()
+docs_schema = DoctorSchema(many=True)
+
 

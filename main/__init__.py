@@ -1,3 +1,5 @@
+#! python3
+
 from flask import Flask
 from .extensions import db,ma,cors
 import firebase_admin
