@@ -7,6 +7,7 @@ from main.schema import doc_schema,docs_schema,comment_schema,comments_schema
 from firebase_admin import auth
 import jwt
 from datetime import datetime as d
+import re
 
 @doctor.route('/register',methods=['POST'])
 def register():
@@ -18,8 +19,28 @@ def register():
     resp = jsonify({'registration':True})
     return resp,200
 
+def check_doc_id(d_id):
+    exp = re.compile(r'([a-zA-Z]{3})(\d\d\d)')
 
+    if exp.search(d_id):
+        return True
+    else:
+        return False
+    
 
+@doctor.route('/login',methods=['POST'])
+def login():
+    cred = request.get_json()
+    if check_doc_id(cred['doc_id']):
+        doc = Doctor.query.filter_by(doc_id=cred['doc_id']).first()
+        if not doc:
+            return make_response(jsonify({'error':'Doc with id not found'}),404)
+        else:
+            ## create token
+    else:
+        return make_response(jsonify({'error':'Invalid id'}),401)
+    return make_response(jsonify({'Login':True}),200)
+    
 
 @doctor.route('/add_remark',methods=['POST'])
 def comment():
