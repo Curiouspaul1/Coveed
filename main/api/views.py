@@ -122,7 +122,6 @@ def signup():
             return make_response(jsonify({"message":"User_id already exists"}),401)
 
 @api.route('/getuser')
-@login_required
 def getuser(current_user):
     user = User.query.filter_by(user_id=current_user.user_id).first()
     if not user:

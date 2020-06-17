@@ -145,8 +145,13 @@ class Doctor(db.Model):
     first_name = db.Column(db.String(50))
     last_name = db.Column(db.String(50))
     qualification = db.Column(db.String(200))
+    doc_id = db.Column(db.String(100))
     docs = db.Column(db.String(500))
-    comments = db.relationship('Doctor',backref='remarks')
+    comments = db.relationship('Doctor',backref='doctor')
+
+    def genId(self):
+        d_id = self.first_name[0:3] + 'cov19'
+        self.doc_id = d_id
 
 class Comments(db.Model):
     id = db.Column(db.Integer,primary_key=True,nullable=False)

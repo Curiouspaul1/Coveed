@@ -8,6 +8,11 @@ from firebase_admin import auth
 import jwt
 from datetime import datetime as d
 
+@doctor.route('/register',methods=['POST'])
+def register():
+    data = request.get_json()
+    
+
 @doctor.route('/add_remark',methods=['POST'])
 def comment():
     if 'access-token' in request.headers:
@@ -24,7 +29,7 @@ def comment():
 
 @doctor.route('/delete_remark/<remark_id>',methods=['DELETE'])
 def delete_comment(remark_id):
-    comment = Comments.query.filter_by(id=id).first()
+    comment = Comments.query.filter_by(id=remark_id).first()
     db.session.delete(comment)
     db.session.commit()
 
@@ -32,4 +37,16 @@ def delete_comment(remark_id):
 
     return resp,200
 
+@doctor.route('/edit_remark/<remark_id>',methods=['PUT'])
+def edit_comment():
+    data = request.get_json()
+    # fetch comment
+    comment = Comments.query.filter_by(id=remark_id).first()
+    comment.content = data['comment']
+    try:
+        db.session.commit()
+    except Exception as e:
+        raise e
+        return make_response(jsonify({'Edit':False}),500)
+    return make_response(jsonify({'Edit':True}),200)
 
