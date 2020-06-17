@@ -150,7 +150,7 @@ class Doctor(db.Model):
     comments = db.relationship('Doctor',backref='doctor')
 
     def genId(self):
-        d_id = self.first_name[0:3] + 'cov19'
+        d_id = self.first_name[0:3] + str(Doctor.query.all().index(self)+1)
         self.doc_id = d_id
 
 class Comments(db.Model):

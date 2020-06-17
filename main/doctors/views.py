@@ -11,7 +11,15 @@ from datetime import datetime as d
 @doctor.route('/register',methods=['POST'])
 def register():
     data = request.get_json()
-    
+    doc = Doctor(first_name=data['first_name'],last_name=data['last_name'],qualification=['qualification'])
+    db.session.add(doc)
+    doc.genId()
+    db.session.commit()
+    resp = jsonify({'registration':True})
+    return resp,200
+
+
+
 
 @doctor.route('/add_remark',methods=['POST'])
 def comment():
