@@ -1,5 +1,6 @@
 from main import db,ma
 import datetime as d
+from flask import current_app
 
 class User(db.Model):
     id = db.Column(db.Integer,nullable=False,primary_key=True)
@@ -32,6 +33,10 @@ class User(db.Model):
     def __init__(self,**kwargs):
         super(User, self).__init__(**kwargs)
         self.guides = Guides.query.all()
+        if self.role == None and self.email != current_app.config['ADMIN_EMAIL']:
+            self.role = Role.query.filter_by(name='USER').first()
+        elif self.role == None and self.email == current_app.config['ADMIN_EMAIL']:
+            self.role = Role.query.filter_by(name='ADMIN').first()
 
     #def reset_medstate:
     #self.days_left
@@ -60,14 +65,15 @@ class Specifics(db.Model):
 class Permission:
     ADD_SYMPTOMS = 2
     CONTACT_HEALTHCARE = 5
-    ADMINISTER = 7
-    ADMIN = 10 
+    ADMINISTER = 3
+    ADMIN = 9
 
 class Role(db.Model):
     id = db.Column(db.Integer,primary_key=True,nullable=False)
     name = db.Column(db.String(20))
     default = db.Column(db.Boolean,default=False,index=True)
     users = db.relationship('User',backref='role')
+    docs = db.relationship('Doctor',backref='role')
     permissions = db.Column(db.Integer)
 
     def __init__(self,**kwargs):
@@ -153,6 +159,10 @@ class Doctor(db.Model):
     def genId(self):
         d_id = self.first_name[0:3] + '00' + str(Doctor.query.all().index(self)+1)
         self.doc_pass = d_id
+
+    def __init__(self,**kwargs):
+        super(User,self).__init__(**kwargs)
+        self.role == Role.query.filter_by(name='DOC').first()
 
 class Comments(db.Model):
     id = db.Column(db.Integer,primary_key=True,nullable=False)

@@ -15,7 +15,7 @@ def __call__(config_object):
     db.init_app(app)
     ma.init_app(app)
     firebase_admin.initialize_app()
-    cors.init_app(app, resources={r"/api/*":{"origins":"*"}})
+    cors.init_app(app, resources={r"/api/*":{"origins":"*"},r"/doctors/*":{"origins":"*"}})
 
     # register blurprint
     from .api import api as api_blueprint

@@ -73,8 +73,9 @@ def add_profile(current_user):
     state = payload['state']
     address = payload['address']
     age = payload['age']
+    travel_history = payload['travel_history']
 
-    user.email,user.tel,user.country,user.state,user.address,user.age = email,tel,country,state,address,age
+    user.email,user.tel,user.country,user.state,user.address,user.age,user.travel_history = email,tel,country,state,address,age,travel_history
     db.session.commit()
 
     return make_response(jsonify({"msg":"Profile updated successfully"}),200)
@@ -82,16 +83,19 @@ def add_profile(current_user):
 @api.route('/add_symptoms',methods=['POST'])
 @login_required
 def add_symptoms(current_user):
-    data = request.get_json(force=True)
-    # fetch user 
-    user = User.query.filter_by(user_id=current_user.user_id).first()
-    new_data = Symptoms(cough=data[0]['cough'],resp=data[0]['resp'],fever=data[0]['fever'],fatigue=data[0]['fatigue'],other=data[0]['other'],date_added=d.datetime.utcnow())
-    new_data.patient = user
-    degrees = Specifics(cough_degree=data[1]['coughDegree'],fever_degree=data[1]['feverDegree'],fatigue_degree=data[1]['fatigueDegree'],other_degree=data[1]['otherDegree'],symptom=new_data)
-    db.session.add_all([new_data,degrees])
-    user.Crt()
-    db.session.commit()
-    return make_response(jsonify({'msg':'Added symptoms succesfully'}),200)
+    if current_user.role == 'USER':
+        data = request.get_json(force=True)
+        # fetch user 
+        user = User.query.filter_by(user_id=current_user.user_id).first()
+        new_data = Symptoms(cough=data[0]['cough'],resp=data[0]['resp'],fever=data[0]['fever'],fatigue=data[0]['fatigue'],other=data[0]['other'],date_added=d.datetime.utcnow())
+        new_data.patient = user
+        degrees = Specifics(cough_degree=data[1]['coughDegree'],fever_degree=data[1]['feverDegree'],fatigue_degree=data[1]['fatigueDegree'],other_degree=data[1]['otherDegree'],symptom=new_data)
+        db.session.add_all([new_data,degrees])
+        user.Crt()
+        db.session.commit()
+        return make_response(jsonify({'msg':'Added symptoms succesfully'}),200)
+    else:
+        return make_response(jsonify({'error':'You don\'t have permission to do that'}),401)
 
 
 @api.route('/user_symptoms',methods=['GET'])
