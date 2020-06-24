@@ -3,7 +3,7 @@ import json
 from flask import request,make_response,jsonify,current_app,json,session,g,request
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
-from main.models import User,Symptoms,Specifics
+from main.models import User,Symptoms,Specifics,Permission
 from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,specific_schema,specifics_schema
 from firebase_admin import auth
 import firebase_admin
@@ -83,7 +83,7 @@ def add_profile(current_user):
 @api.route('/add_symptoms',methods=['POST'])
 @login_required
 def add_symptoms(current_user):
-    if current_user.role == 'USER':
+    if current_user.role.has_permission(Permission.ADD_SYMPTOMS):
         data = request.get_json(force=True)
         # fetch user 
         user = User.query.filter_by(user_id=current_user.user_id).first()
@@ -101,12 +101,15 @@ def add_symptoms(current_user):
 @api.route('/user_symptoms',methods=['GET'])
 @login_required
 def user_symptoms(current_user):
-    user = User.query.filter_by(user_id=current_user.user_id).first()
-    result1 = user.symptoms
-    result2 = []
-    for i in result1:
-        result2.append(specific_schema.dump(Specifics.query.filter_by(symptom_id=i.id).first()))
-    return jsonify({"symptoms":symptoms_schema.dump(result1),"specs":result2})
+    if current_user.role == 'USER':
+        #user = User.query.filter_by(user_id=current_user.user_id).first()
+        result1 = current_user.symptoms
+        result2 = []
+        for i in result1:
+            result2.append(specific_schema.dump(Specifics.query.filter_by(symptom_id=i.id).first()))
+        return jsonify({"symptoms":symptoms_schema.dump(result1),"specs":result2})
+    else:
+        return jsonify({'error':'You don\'t have permission to do that'}),401
     
 
 @api.route('/signup',methods=['POST'])

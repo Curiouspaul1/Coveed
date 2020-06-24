@@ -63,10 +63,10 @@ class Specifics(db.Model):
     symptom_id = db.Column(db.Integer,db.ForeignKey('symptoms.id'))
 
 class Permission:
-    ADD_SYMPTOMS = 2
-    CONTACT_HEALTHCARE = 5
-    ADMINISTER = 3
-    ADMIN = 9
+    ADD_SYMPTOMS = 1
+    CONTACT_HEALTHCARE = 2
+    ADMINISTER = 4
+    ADMIN = 8
 
 class Role(db.Model):
     id = db.Column(db.Integer,primary_key=True,nullable=False)
@@ -155,6 +155,7 @@ class Doctor(db.Model):
     qualification = db.Column(db.String(200))
     docs = db.Column(db.String(500))
     comments = db.relationship('Comments',backref='doctor')
+    role_id = db.Column(db.Integer,db.ForeignKey('role.id'))
 
     def genId(self):
         d_id = self.first_name[0:3] + '00' + str(Doctor.query.all().index(self)+1)
