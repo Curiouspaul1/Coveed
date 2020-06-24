@@ -20,7 +20,7 @@ class User(db.Model):
     symptoms = db.relationship('Symptoms',backref='patient')
     role_id = db.Column(db.Integer,db.ForeignKey('role.id'))
     guide_id = db.Column(db.Integer,db.ForeignKey('guides.id'))
-    remarks = db.relationship('comments',backref='patient')
+    remarks = db.relationship('Comments',backref='patient')
 
     def Crt(self):
         # fetch first symptom date
@@ -31,7 +31,7 @@ class User(db.Model):
 
     def __init__(self,**kwargs):
         super(User, self).__init__(**kwargs)
-        self.guide = Guides.query.all()
+        self.guides = Guides.query.all()
 
     #def reset_medstate:
     #self.days_left
@@ -124,7 +124,7 @@ class Guides(db.Model):
     done = db.Column(db.Boolean,default=False,index=True)
     info = db.Column(db.PickleType())
     time_lapse = db.Column(db.String(50))
-    patients = db.relationship('User',backref=db.backref('guide',lazy='dynamic'), secondary=patients)
+    patients = db.relationship('User',backref=db.backref('guides'), secondary=patients)
 
     @staticmethod
     def insert_guides():
@@ -142,16 +142,17 @@ class Guides(db.Model):
 
 class Doctor(db.Model):
     id = db.Column(db.Integer,primary_key=True,nullable=False)
+    doc_id = db.Column(db.String(200))
+    doc_pass = db.Column(db.String(10))
     first_name = db.Column(db.String(50))
     last_name = db.Column(db.String(50))
     qualification = db.Column(db.String(200))
-    doc_id = db.Column(db.String(100))
     docs = db.Column(db.String(500))
-    comments = db.relationship('Doctor',backref='doctor')
+    comments = db.relationship('Comments',backref='doctor')
 
     def genId(self):
-        d_id = self.first_name[0:3] + str(Doctor.query.all().index(self)+1)
-        self.doc_id = d_id
+        d_id = self.first_name[0:3] + '00' + str(Doctor.query.all().index(self)+1)
+        self.doc_pass = d_id
 
 class Comments(db.Model):
     id = db.Column(db.Integer,primary_key=True,nullable=False)
