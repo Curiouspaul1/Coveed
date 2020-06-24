@@ -144,3 +144,10 @@ def fetchsymptoms(current_user):
     data = open(os.path.join(os.getcwd(),'data.json'),'w')
     data.write(json.dumps(symptoms_schema.dump(result)))
     return jsonify(symptoms_schema.dump(result)),200
+
+@api.route('/getremarks')
+@login_required
+def doc_comments(current_user):
+    comments = current_user.remarks
+    resp = jsonify(comments_schema.dump(comments))
+    return resp,200
