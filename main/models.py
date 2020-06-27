@@ -163,7 +163,7 @@ class Doctor(db.Model):
 
     def __init__(self,**kwargs):
         super(User,self).__init__(**kwargs)
-        self.role == Role.query.filter_by(name='DOC').first()
+        self.role = Role.query.filter_by(name='DOC').first()
 
 class Comments(db.Model):
     id = db.Column(db.Integer,primary_key=True,nullable=False)
