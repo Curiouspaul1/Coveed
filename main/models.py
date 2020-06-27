@@ -162,7 +162,7 @@ class Doctor(db.Model):
         self.doc_pass = d_id
 
     def __init__(self,**kwargs):
-        super(User,self).__init__(**kwargs)
+        super(Doctor,self).__init__(**kwargs)
         self.role = Role.query.filter_by(name='DOC').first()
 
 class Comments(db.Model):
