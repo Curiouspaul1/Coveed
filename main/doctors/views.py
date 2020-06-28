@@ -76,9 +76,7 @@ def comment(doc):
     data = request.get_json()
     content = data['comment']
     new_comment = Comments(content=content,doctor=doc,date_created=d.datetime.utcnow())
-    if 'access-token' in request.cookies:
-        token = request.cookies.get('access-token')
-        new_comment.patient = User.query.filter_by(user_id=jwt.decode(token,'secret')['uid']).first()
+    new_comment.patient = User.query.filter_by(user_id=data['user_id']).first()
     db.session.add(new_comment)
     db.session.commit()
     resp = jsonify({'create_comment':True})
