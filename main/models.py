@@ -30,6 +30,9 @@ class User(db.Model):
         remaining = t_lapse - self.symptoms[-1].date_added
         self.days_left = remaining.days
 
+    def promoteuser(self):
+        self.days_left = 0
+
     def __init__(self,**kwargs):
         super(User, self).__init__(**kwargs)
         self.guides = Guides.query.all()

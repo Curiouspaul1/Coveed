@@ -1,16 +1,27 @@
 from . import api
 import json
-from flask import request,make_response,jsonify,current_app,json,session,g,request
+from flask import render_template,request,make_response,jsonify,current_app,json,session,g,request
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
 from main.models import User,Symptoms,Specifics,Permission,Doctor
-from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,specific_schema,specifics_schema
+from main.api.email_test import EmergencyMail
+from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,specific_schema,specifics_schema,comments_schema
 from firebase_admin import auth
 import firebase_admin
 import jwt
 from functools import wraps
 import datetime as d
 import uuid
+from flask_cors import cross_origin
+
+@api.after_request
+def after_request(response):
+    header = response.headers
+    header['Access-Control-Allow-Origin'] = '*'
+    header['Access-Control-Allow-Headers'] = '*'
+    header['Access-Control-Allow-Methods'] = '*'
+
+    return response
 
 @api.route('/login',methods=['POST'])
 def login():
@@ -25,8 +36,8 @@ def login():
     if 'access-token' in data:
         token = data['access-token']
         try:
-            decoded_token = auth.verify_id_token(token)
-            ##decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
+            #decoded_token = auth.verify_id_token(token)
+            decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
         except Exception as e:
             raise e
             return make_response(jsonify({'error':'An error occured while trying to decode token'}),500)
@@ -44,8 +55,8 @@ def login_required(f):
         token = None
         if 'access-token' in request.headers:
             token = request.headers['access-token']
-            decoded_token = auth.verify_id_token(token)
-            #decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
+            #decoded_token = auth.verify_id_token(token)
+            decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
         else:
             return make_response(jsonify({'error':'token not found'}),404)
         uid = decoded_token['uid']
@@ -73,9 +84,8 @@ def add_profile(current_user):
     state = payload['state']
     address = payload['address']
     age = payload['age']
-    travel_history = payload['travel_history']
 
-    user.email,user.tel,user.country,user.state,user.address,user.age,user.travel_history = email,tel,country,state,address,age,travel_history
+    user.email,user.tel,user.country,user.state,user.address,user.age = email,tel,country,state,address,age
     db.session.commit()
 
     return make_response(jsonify({"msg":"Profile updated successfully"}),200)
@@ -85,7 +95,7 @@ def add_profile(current_user):
 def add_symptoms(current_user):
     if current_user.role.has_permission(Permission.ADD_SYMPTOMS):
         data = request.get_json(force=True)
-        # fetch user 
+        # fetch user and create symptoms
         user = User.query.filter_by(user_id=current_user.user_id).first()
         new_data = Symptoms(cough=data[0]['cough'],resp=data[0]['resp'],fever=data[0]['fever'],fatigue=data[0]['fatigue'],other=data[0]['other'],date_added=d.datetime.utcnow())
         new_data.patient = user
@@ -102,33 +112,35 @@ def add_symptoms(current_user):
 @login_required
 def user_symptoms(current_user):
     if current_user.role == 'USER':
-        #user = User.query.filter_by(user_id=current_user.user_id).first()
-        result1 = current_user.symptoms
+        user = User.query.filter_by(user_id=current_user.user_id).first()
+        result1 = user.symptoms
         result2 = []
         for i in result1:
             result2.append(specific_schema.dump(Specifics.query.filter_by(symptom_id=i.id).first()))
         return jsonify({"symptoms":symptoms_schema.dump(result1),"specs":result2})
     else:
-        return jsonify({'error':'You don\'t have permission to do that'}),401
+        return make_response(jsonify({'error':'You don\'t have permission to do that'}),401)
+
     
 
 @api.route('/signup',methods=['POST'])
 def signup():
     data = request.get_json(force=True)
-    if 'access-token' in data:
-        token = data['access-token']
-        decoded_token = auth.verify_id_token(token)
-        try:
-            new_user = User(first_name=data['firstName'],last_name=data['lastName'],user_id=decoded_token['uid'],sign_up_method=data["signUpMethod"])
-            if data['telephone']:
-                new_user.tel = data['telephone']
-            db.session.add(new_user)
-            db.session.commit()
-            return make_response(jsonify({"messsage":"Sign up successful"}),200)
-        except IntegrityError:
-            return make_response(jsonify({"message":"User_id already exists"}),401)
+    try:
+        new_user = User(first_name=data['firstName'],last_name=data['lastName'],sign_up_date=d.datetime.utcnow(),user_id=str(uuid.uuid4()),sign_up_method=data["signUpMethod"])
+        if 'telephone' in data.keys():
+            new_user.tel = data['telephone']
+        else:
+            pass
+        db.session.add(new_user)
+        db.session.commit()
+        resp = jsonify({'uid':new_user.user_id})
+        return make_response(resp,200)
+    except IntegrityError:
+        return make_response(jsonify({"message":"User_id already exists"}),401)
 
 @api.route('/getuser')
+@login_required
 def getuser(current_user):
     user = User.query.filter_by(user_id=current_user.user_id).first()
     if not user:
@@ -140,12 +152,25 @@ def getuser(current_user):
 def fetchsymptoms(current_user):
     user = User.query.filter_by(user_id=current_user.user_id).first()
     result = user.symptoms
+    # write data to json file for graph generation
     import os,json
     data = open(os.path.join(os.getcwd(),'data.json'),'w')
     data.write(json.dumps(symptoms_schema.dump(result)))
     return jsonify(symptoms_schema.dump(result)),200
 
-""""# for the sake of cors`preflight requests
+@api.route('/getremarks')
+@login_required
+def doc_comments(current_user):
+    comments = current_user.remarks
+    data = comments_schema.dump(comments)
+    for i in data:
+        doc = Doctor.query.filter_by(id=i['doctor_id']).first()
+        i['first_name'],i['last_name'],i['qualification'] = doc.first_name,doc.last_name,doc.qualification
+
+    resp = jsonify(data)
+    return resp,200
+
+# for the sake of cors`preflight requests
 def _build_cors_prelight_response():
     response = make_response()
     response.headers.add("Access-Control-Allow-Origin", "*")
@@ -167,16 +192,20 @@ def promote(current_user):
     else:
         current_user.promoteuser()
         db.session.commit()
-        return jsonify({'Promote':True,'days_left':current_user.days_left}),200""""
+        return jsonify({'Promote':True,'days_left':current_user.days_left}),200
 
-@api.route('/getremarks')
-@login_required
-def doc_comments(current_user):
-    comments = current_user.remarks
-    data = comments_schema.dump(comments)
-    for i in data:
-        doc = Doctor.query.filter_by(id=i['doctor_id']).first()
-        i['first_name'],i['last_name'],i['qualification'] = doc.first_name,doc.last_name,doc.qualification
+'''
+Application ID: local.5ef95687dab9a9.16045600
 
-    resp = jsonify(data)
-    return resp,200
+Application key: FvSco6DxDX7GGl7S3he3d2fuONjX98WfNLPTl0A7JL61g8X19e
+'''
+
+@api.route('/contact_emergency')
+def emergency():
+    result = EmergencyMail("Emergency")
+    if result:
+        return jsonify({'Sent Email':True})
+    else:
+        return jsonify({'Sent Email':False})
+
+    

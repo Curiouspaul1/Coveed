@@ -18,7 +18,7 @@ def register():
     db.session.add(doc)
     doc.genId()
     db.session.commit()
-    resp = jsonify({'register':True})
+    resp = jsonify({'pass':doc.doc_pass})
     return resp,200
 
 # regex validates doc-pass
@@ -39,12 +39,14 @@ def login():
         if not doc:
             return make_response(jsonify({'error':'Doc with id not found'}),404)
         else:
-            token = jwt.encode({'doc_id':doc.doc_id,'exp':d.datetime.utcnow() + d.timedelta(minutes=30)},'secret').decode('utf-8')
-            resp = make_response(jsonify({'login':True}),200)
-            resp.set_cookie('doc-access-token',value=str(token),httponly=True)
-            return make_response(jsonify({'Login':True}),200)
+            """#token = jwt.encode({'doc_id':doc.doc_id,'exp':d.datetime.utcnow() + d.timedelta(minutes=30)},'secret').decode('utf-8')
+            #resp = make_response(jsonify({'login':True}),200)
+            #resp.set_cookie('doc-access-token',value=str(token),httponly=True)"""
+            uid = doc.doc_id
+            return jsonify({"uid":uid}),200
     else:
         return make_response(jsonify({'error':'Invalid id'}),401)
+    return make_response(jsonify({'Login':True}),200)
 
 # authorization decor
 def login_required(f):
@@ -52,9 +54,9 @@ def login_required(f):
     @wraps(f)
     def function(*args,**kwargs):
         token = None
-        if 'doc-access-token' in request.cookies:
-            token = request.cookies.get('doc-access-token')
-            print(token)
+        if 'doc-access-token' in request.headers:
+            #token = request.cookies.get('doc-access-token')
+            token = request.headers['doc-access-token']
             try:
                 token = jwt.decode(token,'secret')
                 # find doc
@@ -110,12 +112,16 @@ def edit_comment(doc,remark_id):
 @doctor.route('/getpatients')
 @login_required
 def getpatients(doc):
-    users = User.query.all()
-    patients = []
-    for user in users:
-        if user.days_left == 0:
-            patients.append(user)
-    resp = jsonify(users_schema.dump(patients))
+    users = User.query.filter_by(days_left=0).all()
+    print(users)
+    resp = jsonify(users_schema.dump(users))
 
+    return resp,200
+
+@doctor.route('/fetchcomments')
+@login_required
+def fetch_comments(doc):
+    comments = doc.comments
+    resp = jsonify({'comments':comments_schema.dump(comments)})
     return resp,200
     
