@@ -145,7 +145,7 @@ def fetchsymptoms(current_user):
     data.write(json.dumps(symptoms_schema.dump(result)))
     return jsonify(symptoms_schema.dump(result)),200
 
-# for the sake of cors`preflight requests
+""""# for the sake of cors`preflight requests
 def _build_cors_prelight_response():
     response = make_response()
     response.headers.add("Access-Control-Allow-Origin", "*")
@@ -167,11 +167,16 @@ def promote(current_user):
     else:
         current_user.promoteuser()
         db.session.commit()
-        return jsonify({'Promote':True,'days_left':current_user.days_left}),200
+        return jsonify({'Promote':True,'days_left':current_user.days_left}),200""""
 
 @api.route('/getremarks')
 @login_required
 def doc_comments(current_user):
     comments = current_user.remarks
-    resp = jsonify(comments_schema.dump(comments))
+    data = comments_schema.dump(comments)
+    for i in data:
+        doc = Doctor.query.filter_by(id=i['doctor_id']).first()
+        i['first_name'],i['last_name'],i['qualification'] = doc.first_name,doc.last_name,doc.qualification
+
+    resp = jsonify(data)
     return resp,200
