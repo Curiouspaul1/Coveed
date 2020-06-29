@@ -145,6 +145,30 @@ def fetchsymptoms(current_user):
     data.write(json.dumps(symptoms_schema.dump(result)))
     return jsonify(symptoms_schema.dump(result)),200
 
+# for the sake of cors`preflight requests
+def _build_cors_prelight_response():
+    response = make_response()
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
+
+def _corsify_actual_response(response):
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
+
+# testing purposes
+@api.route('/promoteuser')
+@cross_origin()
+@login_required
+def promote(current_user):
+    if request.method == 'OPTIONS':
+        return _build_cors_prelight_response()
+    else:
+        current_user.promoteuser()
+        db.session.commit()
+        return jsonify({'Promote':True,'days_left':current_user.days_left}),200
+
 @api.route('/getremarks')
 @login_required
 def doc_comments(current_user):
