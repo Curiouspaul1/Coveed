@@ -2,7 +2,7 @@ from . import doctor
 from flask import request,make_response,jsonify,current_app,json,session,g,request
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
-from main.models import User,Doctor,Comments
+from main.models import User,Doctor,Comments,Guides
 from main.schema import users_schema,doc_schema,docs_schema,comment_schema,comments_schema
 from firebase_admin import auth
 import jwt
@@ -155,7 +155,7 @@ def add_prescription(doc):
     user = User.query.filter_by(user_id=data['user_id']).first()
     guide = Guides.query.filter_by(name=data['name']).first()
     if guide is None:
-        guide = Guides(name=name,info=data[0],time_lapse=data[1],doctor=Doctor.query.filter_by(doc_id=doc.id).first())
+        guide = Guides(name=data['name'],info=data['info'][0][1]+'\n'+data['info'][0][1]+'\n'+data['info'][0][2],time_lapse=data['info'][1],doctor=doc)
         db.session.add(guide)
         db.session.commit()
     try:
