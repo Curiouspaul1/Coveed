@@ -16,7 +16,7 @@ class User(db.Model):
     user_id = db.Column(db.String(100),unique=True)
     sign_up_date = db.Column(db.DateTime())
     sign_up_method = db.Column(db.String(100))
-    med_state = db.Column(db.String(50),default="Quarantined")
+    med_state = db.Column(db.String(50),default="Mild")
     days_left = db.Column(db.Integer)
     symptoms = db.relationship('Symptoms',backref='patient')
     role_id = db.Column(db.Integer,db.ForeignKey('role.id'))

@@ -3,7 +3,7 @@ import json
 from flask import request,make_response,jsonify,current_app,json,session,g,request
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
-from main.models import User,Symptoms,Specifics,Permission
+from main.models import User,Symptoms,Specifics,Permission,Doctor
 from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,specific_schema,specifics_schema
 from firebase_admin import auth
 import firebase_admin
