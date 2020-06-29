@@ -10,6 +10,7 @@ from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,
 from firebase_admin import auth
 import firebase_admin
 import jwt
+import os
 from functools import wraps
 import datetime as d
 import uuid
@@ -205,30 +206,22 @@ Application key: FvSco6DxDX7GGl7S3he3d2fuONjX98WfNLPTl0A7JL61g8X19e
 @login_required
 def emergency(current_user):
     # prepare user info
-    user_data = user_schema.dump(current_user)
+    user_data = user_schema.dump(User.query.filter_by(id=current_user.id).first())
     data = Dataset()
     data.headers = ['First Name','Last Name','Email','Address','State','Age','Travel History','Telephone']
-    data.append(
-        user_data['first_name'],
-        user_data['last_name'],
-        user_data['email'],
-        user_data['address'],
-        user_data['state'],
-        user_data['age'],
-        user_data['travel_history'],
-        user_data['tel']
-    )
-    data.export('xls')
-    # actually send the message
-    '''try:
-        result = EmergencyMail("Emergency Report!",render_template('Emergency.html'))
-        if result:
-            return jsonify({'Sent Email':True}),200
-        else:
-            return jsonify({'Email not sent':True}),500
-    except Exception as e:
-        raise e
-        return jsonify({'Sent Email':False}),500'''
-    return jsonify({'DOne':True})
-
+    for i in [(user_data['first_name'],user_data['last_name'],user_data['email'],user_data['address'],user_data['state'],user_data['age'],user_data['travel_history'],user_data['tel'])]:
+        data.append(i)
+    with open(f'{os.getcwd()}/user_dat.xlsx','wb') as file:
+        file.write(data.export('xlsx'))
+        # actually send the message
+        try:
+            result = EmergencyMail("Emergency Report!",render_template('Emergency.html'),file.name)
+            if result:
+                return jsonify({'Sent Email':True}),200
+            else:
+                return jsonify({'Email not sent':True}),500  
+        except Exception as e:
+            raise e
+            return jsonify({'Sent Email':False}),500
+        file.close()
     
