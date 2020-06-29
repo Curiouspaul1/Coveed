@@ -1,20 +1,16 @@
 from . import api
-import json
 from flask import render_template,request,make_response,jsonify,current_app,json,session,g,request
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
+from flask_cors import cross_origin
 from tablib import Dataset
 from main.models import User,Symptoms,Specifics,Permission,Doctor
 from main.api.email_test import EmergencyMail
 from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,specific_schema,specifics_schema,comments_schema
-from firebase_admin import auth
-import firebase_admin
-import jwt
-import os
+from firebase_admin import au
+import os,uuid,jwt,firebase_admin,json
 from functools import wraps
 import datetime as d
-import uuid
-from flask_cors import cross_origin
 
 @api.after_request
 def after_request(response):
