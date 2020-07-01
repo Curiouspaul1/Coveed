@@ -212,6 +212,7 @@ def emergency(current_user):
     for i in [(user_data['first_name'],user_data['last_name'],user_data['email'],user_data['address'],user_data['state'],user_data['age'],user_data['travel_history'],user_data['tel'])]:
         data.append(i)
     with open(f'{os.getcwd()}/user_dat.xlsx','wb') as file:
+        print(file.name)
         file.write(data.export('xlsx'))
         # actually send the message
         try:
