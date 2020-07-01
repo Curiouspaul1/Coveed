@@ -12,7 +12,7 @@ def EmergencyMail(mail_subject,html_content,file_path):
     to the necessary agencies"""
     message = Mail(
         from_email = current_app.config['APP_EMAIL'],
-        to_emails = current_app.config['AGENT_EMAIL'],
+        to_emails = current_app.config['AGENT_EMAILS'].split(' '),
         subject = mail_subject,
         html_content = html_content
     )
