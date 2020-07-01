@@ -3,6 +3,7 @@ import json
 from flask import render_template,request,make_response,jsonify,current_app,json,session,g,request
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
+from tablib import Dataset
 from main.models import User,Symptoms,Specifics,Permission,Doctor
 from main.api.email_test import EmergencyMail
 from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,specific_schema,specifics_schema,comments_schema
@@ -201,11 +202,33 @@ Application key: FvSco6DxDX7GGl7S3he3d2fuONjX98WfNLPTl0A7JL61g8X19e
 '''
 
 @api.route('/contact_emergency')
-def emergency():
-    result = EmergencyMail("Emergency")
-    if result:
-        return jsonify({'Sent Email':True})
-    else:
-        return jsonify({'Sent Email':False})
+@login_required
+def emergency(current_user):
+    # prepare user info
+    user_data = user_schema.dump(current_user)
+    data = Dataset()
+    data.headers = ['First Name','Last Name','Email','Address','State','Age','Travel History','Telephone']
+    data.append(
+        user_data['first_name'],
+        user_data['last_name'],
+        user_data['email'],
+        user_data['address'],
+        user_data['state'],
+        user_data['age'],
+        user_data['travel_history'],
+        user_data['tel']
+    )
+    data.export('xls')
+    # actually send the message
+    '''try:
+        result = EmergencyMail("Emergency Report!",render_template('Emergency.html'))
+        if result:
+            return jsonify({'Sent Email':True}),200
+        else:
+            return jsonify({'Email not sent':True}),500
+    except Exception as e:
+        raise e
+        return jsonify({'Sent Email':False}),500'''
+    return jsonify({'DOne':True})
 
     
