@@ -110,12 +110,55 @@ def edit_comment(doc,remark_id):
 @doctor.route('/getpatients')
 @login_required
 def getpatients(doc):
-    users = User.query.all()
-    patients = []
-    for user in users:
-        if user.days_left == 0:
-            patients.append(user)
-    resp = jsonify(users_schema.dump(patients))
+    users = User.query.filter_by(days_left=0).all()
+    print(users)
+    resp = jsonify(users_schema.dump(users))
 
     return resp,200
-    
+
+@doctor.route('/fetchcomments')
+@login_required
+def fetch_comments(doc):
+    comments = doc.comments
+    resp = jsonify({'comments':comments_schema.dump(comments)})
+    return resp,200
+
+@doctor.route('/fetchcomments/<user_id>')
+@login_required
+def fetchcomments(doc,user_id):
+    comments = doc.comments
+    result = []
+    for comment in comments:
+        if comment.user_id == User.query.filter_by(user_id=user_id).first().id:
+            result.append(comment)
+    print(comments_schema.dump(result))
+    return json.dumps(comments_schema.dump(result)),200
+
+@doctor.route('/flag',methods=['POST'])
+@login_required
+def flagcase(doc):
+    data = request.get_json()
+    # find user
+    user = User.query.filter_by(user_id=data['user_id']).first()
+    try:
+        user.set_critical_state()
+        return jsonify({'Flagged Critical':True}),200
+    except Exception as e:
+        return jsonify({'Error':'An error occurred'}),500
+
+@doctor.route('/add_prescription',methods=['POST'])
+@login_required
+def add_prescription(doc):
+    data = request.get_json(force=True)
+    user = User.query.filter_by(user_id=data['user_id']).first()
+    guide = Guides.query.filter_by(name=data['name']).first()
+    if guide is None:
+        guide = Guides(name=name,info=data[0],time_lapse=data[1],doctor=Doctor.query.filter_by(doc_id=doc.id).first())
+        db.session.add(guide)
+        db.session.commit()
+    try:
+        user.add_guide(guide)
+        return jsonify({'Added Prescription':True}),200
+    except Exception as e:
+        raise e
+        return jsonify({'Added Prescription':False}),500
