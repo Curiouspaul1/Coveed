@@ -124,4 +124,3 @@ def fetch_comments(doc):
     comments = doc.comments
     resp = jsonify({'comments':comments_schema.dump(comments)})
     return resp,200
-    

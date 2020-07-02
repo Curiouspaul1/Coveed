@@ -225,4 +225,5 @@ def emergency(current_user):
             raise e
             return jsonify({'Sent Email':False}),500
         file.close()
+
     
