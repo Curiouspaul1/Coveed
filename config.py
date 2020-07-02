@@ -11,7 +11,7 @@ class Config:
     AGENT_EMAILS = os.environ.get('AGENT_EMAILS')
 
 class DevelopmentConfig(Config):
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir,'coveed-dev.sqlite') or os.getenv('DEV_URI')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir,'coved-dev.sqlite') or os.getenv('DEV_URI')
     DEBUG = True
     #cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
 

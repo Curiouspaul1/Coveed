@@ -147,3 +147,20 @@ def flagcase(doc):
         return jsonify({'Flagged Critical':True}),200
     except Exception as e:
         return jsonify({'Error':'An error occurred'}),500
+
+@doctor.route('/add_prescription',methods=['POST'])
+@login_required
+def add_prescription(doc):
+    data = request.get_json(force=True)
+    user = User.query.filter_by(user_id=data['user_id']).first()
+    guide = Guides.query.filter_by(name=data['name']).first()
+    if guide is None:
+        guide = Guides(name=name,info=data[0],time_lapse=data[1],doctor=Doctor.query.filter_by(doc_id=doc.id).first())
+        db.session.add(guide)
+        db.session.commit()
+    try:
+        user.add_guide(guide)
+        return jsonify({'Added Prescription':True}),200
+    except Exception as e:
+        raise e
+        return jsonify({'Added Prescription':False}),500
