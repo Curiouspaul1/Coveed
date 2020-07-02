@@ -135,3 +135,15 @@ def fetchcomments(doc,user_id):
             result.append(comment)
     print(comments_schema.dump(result))
     return json.dumps(comments_schema.dump(result)),200
+
+@doctor.route('/flag',methods=['POST'])
+@login_required
+def flagcase(doc):
+    data = request.get_json()
+    # find user
+    user = User.query.filter_by(user_id=data['user_id']).first()
+    try:
+        user.set_critical_state()
+        return jsonify({'Flagged Critical':True}),200
+    except Exception as e:
+        return jsonify({'Error':'An error occurred'}),500

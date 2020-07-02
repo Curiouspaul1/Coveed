@@ -28,7 +28,12 @@ class User(db.Model):
         sdate = self.symptoms[0].date_added 
         t_lapse = sdate + d.timedelta(weeks=2)
         remaining = t_lapse - self.symptoms[-1].date_added
-        self.days_left = remaining.days
+        self.days_left = remaining
+        
+    def set_critical_state(self):
+        self.med_state = 'Critical'
+        db.session.commit()
+
 
     def promoteuser(self):
         self.days_left = 0
