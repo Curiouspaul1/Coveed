@@ -124,3 +124,14 @@ def fetch_comments(doc):
     comments = doc.comments
     resp = jsonify({'comments':comments_schema.dump(comments)})
     return resp,200
+
+@doctor.route('/fetchcomments/<user_id>')
+@login_required
+def fetchcomments(doc,user_id):
+    comments = doc.comments
+    result = []
+    for comment in comments:
+        if comment.user_id == User.query.filter_by(user_id=user_id).first().id:
+            result.append(comment)
+    print(comments_schema.dump(result))
+    return json.dumps(comments_schema.dump(result)),200

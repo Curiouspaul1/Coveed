@@ -196,12 +196,6 @@ def promote(current_user):
         db.session.commit()
         return jsonify({'Promote':True,'days_left':current_user.days_left}),200
 
-'''
-Application ID: local.5ef95687dab9a9.16045600
-
-Application key: FvSco6DxDX7GGl7S3he3d2fuONjX98WfNLPTl0A7JL61g8X19e
-'''
-
 @api.route('/contact_emergency')
 @login_required
 def emergency(current_user):
