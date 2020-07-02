@@ -155,7 +155,7 @@ def add_prescription(doc):
     user = User.query.filter_by(user_id=data['user_id']).first()
     guide = Guides.query.filter_by(name=data['name']).first()
     if guide is None:
-        guide = Guides(name=data['name'],info=data['info'][0][1]+'\n'+data['info'][0][1]+'\n'+data['info'][2],time_lapse=data['info'][1],doctor=Doctor.query.filter_by(doc_id=doc.id).first())
+        guide = Guides(name=data['name'],info=data['info'][0][1]+'\n'+data['info'][0][1]+'\n'+data['info'][0][2],time_lapse=data['info'][1],doctor=Doctor.query.filter_by(doc_id=doc.id).first())
         db.session.add(guide)
         db.session.commit()
     try:
