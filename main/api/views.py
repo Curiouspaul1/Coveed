@@ -187,6 +187,7 @@ def doc_comments(current_user):
 def emergency(current_user):
     # prepare user info
     user_data = user_schema.dump(User.query.filter_by(id=current_user.id).first())
+    User.query.filter_by(id=current_user.id).first().set_critical_state()
     data = Dataset()
     data.headers = ['First Name','Last Name','Email','Address','State','Age','Travel History','Telephone']
     for i in [(user_data['first_name'],user_data['last_name'],user_data['email'],user_data['address'],user_data['state'],user_data['age'],user_data['travel_history'],user_data['tel'])]:

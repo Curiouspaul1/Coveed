@@ -28,11 +28,25 @@ class User(db.Model):
         sdate = self.symptoms[0].date_added 
         t_lapse = sdate + d.timedelta(weeks=2)
         remaining = t_lapse - self.symptoms[-1].date_added
-        self.days_left = remaining.days
+        self.days_left = remaining
+        
+    def set_critical_state(self):
+        self.med_state = 'Critical'
+        db.session.commit()
+
+
+    def promoteuser(self):
+        self.days_left = 0
+
+    def add_guide(self,data):
+        self.guides.append(data)
+        db.session.commit()
 
     def __init__(self,**kwargs):
         super(User, self).__init__(**kwargs)
-        self.guides = Guides.query.all()
+        self.guides.append(Guides.query.filter_by(id=1).first())
+        self.guides.append(Guides.query.filter_by(id=2).first())
+        self.guides.append(Guides.query.filter_by(id=3).first())
         if self.role == None and self.email != current_app.config['ADMIN_EMAIL']:
             self.role = Role.query.filter_by(name='USER').first()
         elif self.role == None and self.email == current_app.config['ADMIN_EMAIL']:
@@ -130,6 +144,7 @@ class Guides(db.Model):
     done = db.Column(db.Boolean,default=False,index=True)
     info = db.Column(db.PickleType())
     time_lapse = db.Column(db.String(50))
+    doc_id = db.Column(db.Integer,db.ForeignKey('doctor.id'))
     patients = db.relationship('User',backref=db.backref('guides'), secondary=patients)
 
     @staticmethod
@@ -144,7 +159,7 @@ class Guides(db.Model):
             if guide is None:
                 guide = Guides(name=g,info=guides[g][0],time_lapse=guides[g][1])
             db.session.add(guide)
-        db.session.commit()
+        db.session.commit()       
 
 class Doctor(db.Model):
     id = db.Column(db.Integer,primary_key=True,nullable=False)
@@ -154,6 +169,7 @@ class Doctor(db.Model):
     last_name = db.Column(db.String(50))
     qualification = db.Column(db.String(200))
     docs = db.Column(db.String(500))
+    guides = db.relationship('Guides',backref='doctor')
     comments = db.relationship('Comments',backref='doctor')
     role_id = db.Column(db.Integer,db.ForeignKey('role.id'))
 
