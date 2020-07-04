@@ -7,7 +7,7 @@ from tablib import Dataset
 from main.models import User,Symptoms,Specifics,Permission,Doctor
 from main.api.email_test import EmergencyMail
 from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,specific_schema,specifics_schema,comments_schema
-from firebase_admin import au
+#from firebase_admin import admin
 import os,uuid,jwt,firebase_admin,json
 from functools import wraps
 import datetime as d
