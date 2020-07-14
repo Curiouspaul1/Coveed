@@ -7,8 +7,9 @@ from tablib import Dataset
 from main.models import User,Symptoms,Specifics,Permission,Doctor
 from main.api.email_test import EmergencyMail
 from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,specific_schema,specifics_schema,comments_schema
-#from firebase_admin import admin
-import os,uuid,jwt,firebase_admin,json
+from firebase_admin import auth
+import firebase_admin
+import os,uuid,jwt,json
 from functools import wraps
 import datetime as d
 
@@ -23,19 +24,12 @@ def after_request(response):
 
 @api.route('/login',methods=['POST'])
 def login():
-    """
-    if request.method == 'GET':
-        user = User.quer.filter_by(username=username).first()
-        if user:
-            return make_response(jsonify({"signup_method":user.sign_up_method}),200)
-        return make_response("No user with username found",401)
-    """
     data = request.get_json()
     if 'access-token' in data:
         token = data['access-token']
         try:
-            #decoded_token = auth.verify_id_token(token)
-            decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
+            decoded_token = auth.verify_id_token(token)
+            #decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
         except Exception as e:
             raise e
             return make_response(jsonify({'error':'An error occured while trying to decode token'}),500)
@@ -53,8 +47,8 @@ def login_required(f):
         token = None
         if 'access-token' in request.headers:
             token = request.headers['access-token']
-            #decoded_token = auth.verify_id_token(token)
-            decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
+            decoded_token = auth.verify_id_token(token)
+            #decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
         else:
             return make_response(jsonify({'error':'token not found'}),404)
         uid = decoded_token['uid']
@@ -124,18 +118,22 @@ def user_symptoms(current_user):
 @api.route('/signup',methods=['POST'])
 def signup():
     data = request.get_json(force=True)
-    try:
-        new_user = User(first_name=data['firstName'],last_name=data['lastName'],sign_up_date=d.datetime.utcnow(),user_id=str(uuid.uuid4()),sign_up_method=data["signUpMethod"])
-        if 'telephone' in data.keys():
-            new_user.tel = data['telephone']
-        else:
-            pass
-        db.session.add(new_user)
-        db.session.commit()
-        resp = jsonify({'uid':new_user.user_id})
-        return make_response(resp,200)
-    except IntegrityError:
-        return make_response(jsonify({"message":"User_id already exists"}),401)
+    if 'access-token' in data:
+        uid = auth.verify_id_token(data['access-token'])
+        uid = uid['user_id']
+        try:
+           new_user = User(first_name=data['firstName'],last_name=data['lastName'],sign_up_date=d.datetime.utcnow(),user_id=uid,sign_up_method=data["signUpMethod"])
+           if 'telephone' in data.keys():
+                new_user.tel = data['telephone']
+           else:
+                pass
+           db.session.add(new_user)
+           db.session.commit()
+           return make_response(jsonify({"Sign Up":"Successful"}),200)
+        except IntegrityError:
+            return make_response(jsonify({"message":"User_id already exists"}),401)
+    else:
+        return jsonify({'Error':'Token is missing'}),401
 
 @api.route('/getuser')
 @login_required
