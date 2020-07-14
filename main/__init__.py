@@ -15,7 +15,6 @@ def __call__(config_object):
 
     db.init_app(app)
     ma.init_app(app)
-    firebase_admin.initialize_app(app.config['CRED'])
     cors.init_app(app, resources={r"/api/*":{"origins":"*"},r"/doctors/*":{"origins":"*"}})
     #logging.getLogger('flask_cors').level = logging.DEBUG
 

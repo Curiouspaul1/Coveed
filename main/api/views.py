@@ -8,7 +8,6 @@ from main.models import User,Symptoms,Specifics,Permission,Doctor
 from main.api.email_test import EmergencyMail
 from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,specific_schema,specifics_schema,comments_schema
 from firebase_admin import auth
-import firebase_admin
 import os,uuid,jwt,json
 from functools import wraps
 import datetime as d
@@ -22,7 +21,7 @@ def after_request(response):
 
     return response
 
-@api.route('/login',methods=['POST'])
+"""@api.route('/login',methods=['POST'])
 def login():
     data = request.get_json()
     if 'access-token' in data:
@@ -33,13 +32,13 @@ def login():
         except Exception as e:
             raise e
             return make_response(jsonify({'error':'An error occured while trying to decode token'}),500)
-        uid = decoded_token['uid']
+        uid = decoded_token['user_id']
     # find user with id
     user = User.query.filter_by(user_id=uid).first()
     if user:
         #session['user_id'] = user_id
         return make_response(jsonify({'msg':'verified user successfully'}),200)
-    return make_response(jsonify({'error':'no user with such id found'}),400)
+    return make_response(jsonify({'error':'no user with such id found'}),400)"""
 
 def login_required(f):
     @wraps(f)
