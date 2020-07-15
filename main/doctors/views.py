@@ -5,6 +5,7 @@ from main.extensions import db
 from main.models import User,Doctor,Comments,Guides
 from main.schema import users_schema,doc_schema,docs_schema,comment_schema,comments_schema
 from firebase_admin import auth
+from jwt.exceptions import InvalidSignatureError,ExpiredSignatureError
 import jwt
 import datetime as d
 import re
@@ -39,11 +40,12 @@ def login():
         if not doc:
             return make_response(jsonify({'error':'Doc with id not found'}),404)
         else:
-            """#token = jwt.encode({'doc_id':doc.doc_id,'exp':d.datetime.utcnow() + d.timedelta(minutes=30)},'secret').decode('utf-8')
-            #resp = make_response(jsonify({'login':True}),200)
-            #resp.set_cookie('doc-access-token',value=str(token),httponly=True)"""
-            uid = doc.doc_id
-            return jsonify({"uid":uid}),200
+            access_token = jwt.encode({'doc_id':doc.doc_id,'exp':d.datetime.utcnow() + d.timedelta(minutes=30)},current_app.config['SECRET_KEY']).decode('utf-8')
+            refresh_token = jwt.encode({'doc_id':doc.doc_id,'exp':d.datetime.utcnow()+d.timedelta(days=30)},current_app.config['SECRET_KEY']).decode('utf-8')
+            resp = make_response(jsonify({'login':True}),200)
+            resp.set_cookie('doc-access-token',value=str(access_token),httponly=True)
+            resp.set_cookie('doc_refresh_token',value=str(refresh_token),httponly=True)
+            return resp
     else:
         return make_response(jsonify({'error':'Invalid id'}),401)
     return make_response(jsonify({'Login':True}),200)
@@ -54,13 +56,12 @@ def login_required(f):
     @wraps(f)
     def function(*args,**kwargs):
         token = None
-        if 'doc-access-token' in request.headers:
-            #token = request.cookies.get('doc-access-token')
-            token = request.headers['doc-access-token']
+        if 'doc-access-token' in request.cookies:
+            token = request.cookies.get('doc-access-token')
             try:
-                token = jwt.decode(token,'secret')
+                token = jwt.decode(token,current_app.config['SECRET_KEY'])
                 # find doc
-                doc = Doctor.query.filter_by(doc_id=token['uid']).first()
+                doc = Doctor.query.filter_by(doc_id=token['doc_id']).first()
                 if doc:
                     return f(doc,*args,**kwargs)
                 else:
@@ -71,6 +72,13 @@ def login_required(f):
         else:
             return make_response(jsonify({'Token':'Missing'}),401)
     return function
+    
+
+@doctor.route('/refresh_token',methods=['POST'])
+def refresh_token():
+    token = request.cookies.get('doc_refresh_token')
+    resp = jwt.encode({''}) token.decode(current_app.confi['SECRET_KEY'])
+
 
 @doctor.route('/add_remark',methods=['POST'])
 @login_required

@@ -15,7 +15,7 @@ def __call__(config_object):
 
     db.init_app(app)
     ma.init_app(app)
-    cors.init_app(app, resources={r"/api/*":{"origins":"*"},r"/doctors/*":{"origins":"*"}})
+    cors.init_app(app,allow_headers='*', resources={r"/api/*":{"origins":"*"},r"/doctors/*":{"origins":"*"}})
     #logging.getLogger('flask_cors').level = logging.DEBUG
 
     # register blurprint
