@@ -8,7 +8,8 @@ import firebase_admin
 
 app = __call__(os.getenv("FLASK_CONFIG") or "default")
 migrate = Migrate(app,db)
-firebase_admin.initialize_app(app.config['CRED'])
+#firebase_admin.initialize_app(app.config['CRED'])
+firebase_admin.initialize_app()
 
 @app.shell_context_processor
 def make_shell_context():
