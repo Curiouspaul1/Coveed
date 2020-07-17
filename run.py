@@ -5,12 +5,13 @@ from main.schema import user_schema,users_schema,GuideSchema,comment_schema,comm
 from flask_migrate import Migrate
 import os
 import firebase_admin
+from firebase_admin import credentials
 
 app = __call__(os.getenv("FLASK_CONFIG") or "default")
 migrate = Migrate(app,db)
 key,email = app.config['FIREBASE_KEY'],app.config['FIREBASE_CLIENT_EMAIL']
-firebase_admin.initialize_app(
-    {
+cred = credentials.Certificate(
+{
         'type':"service_account",
         'project_id':"coveed-19",
         "private_key_id": "abf956b68dd7ac9a29dbd584d7c6c1e7990050e5",
@@ -22,6 +23,8 @@ firebase_admin.initialize_app(
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs"
     }
 )
+print(cred)
+firebase_admin.initialize_app(cred)
 
 @app.shell_context_processor
 def make_shell_context():
