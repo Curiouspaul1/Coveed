@@ -19,8 +19,7 @@ firebase_admin.initialize_app(
         "client_id": "106525062045074392577",
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",
-        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-5pl26%\40coveed-19.iam.gserviceaccount.com"
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs"
     }
 )
 
