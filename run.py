@@ -9,14 +9,17 @@ from firebase_admin import credentials
 
 app = __call__(os.getenv("FLASK_CONFIG") or "default")
 migrate = Migrate(app,db)
-key,email = app.config['FIREBASE_KEY'],app.config['FIREBASE_CLIENT_EMAIL']
+
+key = app.config['F_KEY']
+email = app.config['CLIENT_EMAIL']
+
 cred = credentials.Certificate(
-{
-        'type':"service_account",
-        'project_id':"coveed-19",
-        "private_key_id": "f5f753a8a62c609689c8576cc52849dd297abf21",
-        'private_key':key,
-        'client_email':email,
+    {
+        "type": "service_account",
+        "project_id": "coveed-19",
+        "private_key_id": "f8a920fad14bf6368832e2cd58baa7f3159dad4f",
+        "private_key":key,
+        "client_email": email,
         "client_id": "106525062045074392577",
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",
@@ -24,8 +27,7 @@ cred = credentials.Certificate(
         "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-5pl26%40coveed-19.iam.gserviceaccount.com"
     }
 )
-print(key)
-print(cred)
+
 firebase_admin.initialize_app(cred)
 
 @app.shell_context_processor
