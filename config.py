@@ -9,12 +9,12 @@ class Config:
     ADMIN_EMAIL = ''
     APP_EMAIL = os.environ.get('APP_EMAIL')
     AGENT_EMAILS = os.environ.get('AGENT_EMAILS')
+    FIREBASE_KEY = os.getenv('FIREBASE_KEY')
+    FIREBASE_CLIENT_EMAIL = os.getenv('FIREBASE_CLIENT_EMAIL')
 
 class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir,'coved-dev.sqlite') or os.getenv('DEV_URI')
     DEBUG = True
-    FIREBASE_KEY = os.getenv('FIREBASE_KEY')
-    FIREBASE_CLIENT_EMAIL = os.getenv('FIREBASE_CLIENT_EMAIL')
 
 class TestingConfig(Config):
     TESTING =True
