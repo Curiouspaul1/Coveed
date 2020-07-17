@@ -220,3 +220,13 @@ def emergency(current_user):
         file.close()
 
     
+@api.route('/user_image',methods=['PUT'])
+@login_required
+def add_profile_photo(current_user):
+    url = request.get_json(force=True)
+    current_user.profile_pic = url['image_url']
+    try:
+        db.session.commit()
+    except Exception as e:
+        return jsonify({'Error':'Somehting went wrong'},500)
+    return jsonify({'profile_pic uploaded successfully'}),200

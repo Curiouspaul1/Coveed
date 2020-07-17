@@ -7,6 +7,7 @@ class User(db.Model):
     first_name = db.Column(db.String(100))
     last_name = db.Column(db.String(100))
     email = db.Column(db.String(100))
+    profile_pic = db.Column(db.String(200))
     tel = db.Column(db.String(50))
     country = db.Column(db.String(50))
     state = db.Column(db.String(50))
