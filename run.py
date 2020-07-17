@@ -8,7 +8,8 @@ import firebase_admin
 
 app = __call__(os.getenv("FLASK_CONFIG") or "default")
 migrate = Migrate(app,db)
-firebase_admin.initialize_app(f"{'private_key':app.config['FIREBASE_KEY'],'client_email':app.config['FIREBASE_CLIENT_EMAIL']}")
+key,email = app.config['FIREBASE_KEY'],app.config['FIREBASE_CLIENT_EMAIL']
+firebase_admin.initialize_app({'private_key':key,'client_email':email})
 
 @app.shell_context_processor
 def make_shell_context():
