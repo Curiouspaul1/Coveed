@@ -15,7 +15,6 @@ class DevelopmentConfig(Config):
     DEBUG = True
     FIREBASE_KEY = os.getenv('FIREBASE_KEY')
     FIREBASE_CLIENT_EMAIL = os.getenv('FIREBASE_CLIENT_EMAIL')
-    #CRED = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
 
 class TestingConfig(Config):
     TESTING =True
