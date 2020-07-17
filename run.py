@@ -9,7 +9,20 @@ import firebase_admin
 app = __call__(os.getenv("FLASK_CONFIG") or "default")
 migrate = Migrate(app,db)
 key,email = app.config['FIREBASE_KEY'],app.config['FIREBASE_CLIENT_EMAIL']
-firebase_admin.initialize_app({'private_key':key,'client_email':email})
+firebase_admin.initialize_app(
+    {
+        'type':"service_account",
+        'project_id':"coveed-19",
+        "private_key_id": "abf956b68dd7ac9a29dbd584d7c6c1e7990050e5",
+        'private_key':key,
+        'client_email':email,
+        "client_id": "106525062045074392577",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-5pl26%40coveed-19.iam.gserviceaccount.com"
+    }
+)
 
 @app.shell_context_processor
 def make_shell_context():
