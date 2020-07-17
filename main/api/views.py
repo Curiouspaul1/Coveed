@@ -47,14 +47,14 @@ def login_required(f):
         if 'access-token' in request.headers:
             token = request.headers['access-token']
             decoded_token = auth.verify_id_token(token)
-            print(decoded_token)
-            current_app.logger.info(decoded_token)
             #decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
         else:
             return make_response(jsonify({'error':'token not found'}),404)
         uid = decoded_token['uid']
         # find user with id
         current_user = User.query.filter_by(user_id=uid).first()
+        if not current_user:
+            return jsonify({'Error':'User not found'}),404
         return f(current_user,*args,**kwargs)
     return function
         
@@ -147,13 +147,16 @@ def getuser(current_user):
 @api.route('/fetch_user_symptoms')
 @login_required
 def fetchsymptoms(current_user):
-    user = User.query.filter_by(user_id=current_user.user_id).first()
-    result = user.symptoms
-    # write data to json file for graph generation
-    import os,json
-    data = open(os.path.join(os.getcwd(),'data.json'),'w')
-    data.write(json.dumps(symptoms_schema.dump(result)))
-    return jsonify(symptoms_schema.dump(result)),200
+    if current_user:
+        user = User.query.filter_by(user_id=current_user.user_id).first()
+        result = user.symptoms
+        # write data to json file for graph generation
+        import os,json
+        data = open(os.path.join(os.getcwd(),'data.json'),'w')
+        data.write(json.dumps(symptoms_schema.dump(result)))
+        return jsonify(symptoms_schema.dump(result)),200
+    
+    return jsonify({'Error':'User with matching ID not found'}),200
 
 @api.route('/getremarks')
 @login_required
