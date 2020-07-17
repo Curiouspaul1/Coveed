@@ -24,6 +24,7 @@ cred = credentials.Certificate(
         "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-5pl26%40coveed-19.iam.gserviceaccount.com"
     }
 )
+print(key)
 print(cred)
 firebase_admin.initialize_app(cred)
 
