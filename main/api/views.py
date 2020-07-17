@@ -48,6 +48,7 @@ def login_required(f):
             token = request.headers['access-token']
             decoded_token = auth.verify_id_token(token)
             print(decoded_token)
+            current_app.logger.info(decoded_token)
             #decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
         else:
             return make_response(jsonify({'error':'token not found'}),404)
