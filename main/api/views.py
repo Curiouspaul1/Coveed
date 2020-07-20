@@ -120,7 +120,7 @@ def user_symptoms(current_user):
 def signup():
     data = request.get_json(force=True)
     if 'access-token' in request.headers:
-        uid = auth.verify_id_token(data['access-token'])
+        uid = auth.verify_id_token(request.headers['access-token'])
         uid = uid['user_id']
         try:
            new_user = User(first_name=data['firstName'],last_name=data['lastName'],sign_up_date=d.datetime.utcnow(),user_id=uid,sign_up_method=data["signUpMethod"])
