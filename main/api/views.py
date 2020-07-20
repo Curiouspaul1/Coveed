@@ -46,6 +46,7 @@ def login_required(f):
         token = None
         if 'access-token' in request.headers:
             token = request.headers['access-token']
+            print(token)
             decoded_token = auth.verify_id_token(token)
             #decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
         else:
@@ -120,6 +121,7 @@ def user_symptoms(current_user):
 def signup():
     data = request.get_json(force=True)
     if 'access-token' in request.headers:
+        print(request.headers['access-token'])
         uid = auth.verify_id_token(request.headers['access-token'])
         uid = uid['user_id']
         try:
