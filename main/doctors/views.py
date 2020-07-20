@@ -41,12 +41,13 @@ def login():
             return make_response(jsonify({'error':'Doc with id not found'}),404)
         else:
             # Xss Tokens
-            access_token = jwt.encode({'doc_id':doc.doc_id,'exp':d.datetime.utcnow() + d.timedelta(minutes=60)},current_app.config['SECRET_KEY']).decode('utf-8')
-            refresh_token = jwt.encode({'doc_id':doc.doc_id,'exp':d.datetime.utcnow()+d.timedelta(days=30)},current_app.config['SECRET_KEY']).decode('utf-8')
+            key = current_app.config['KEY']
+            access_token = jwt.encode({'doc_id':doc.doc_id,'exp':d.datetime.utcnow() + d.timedelta(minutes=60)},key)
+            refresh_token = jwt.encode({'doc_id':doc.doc_id,'exp':d.datetime.utcnow()+d.timedelta(days=30)},key)
             #CSRF Tokens
             uid = str(uuid.uuid4())
-            csrf_access_token = jwt.encode({'uid':uid,'exp':d.datetime.utcnow()+d.timedelta(minutes=60)},current_app.config['SECRET_KEY']).decode('utf-8')
-            csrf_refresh_token = jwt.encode({'uid':uid,'exp':d.datetime.utcnow()+d.timedelta(days=30)},current_app.config['SECRET_KEY']).decode('utf-8')
+            csrf_access_token = jwt.encode({'uid':uid,'exp':d.datetime.utcnow()+d.timedelta(minutes=60)},key).decode('utf-8')
+            csrf_refresh_token = jwt.encode({'uid':uid,'exp':d.datetime.utcnow()+d.timedelta(days=30)},key).decode('utf-8')
             print(csrf_access_token,csrf_refresh_token)
             resp = make_response(jsonify({'login':True,'dc_token':str(csrf_access_token),'dc_refresh_token':str(csrf_refresh_token)}),200)
             #XSS Cookies
@@ -67,7 +68,7 @@ def login_required(f):
         if 'doc_access_token' in request.cookies and 'doc_csrf_access_token' in request.headers:
             token = request.cookies.get('doc_access_token')
             try:
-                token = jwt.decode(token,current_app.config['SECRET_KEY'])
+                token = jwt.decode(token,current_app.config['KEY'])
                 # find doc
                 doc = Doctor.query.filter_by(doc_id=token['doc_id']).first()
                 if doc:
@@ -84,25 +85,32 @@ def login_required(f):
 
 @doctor.route('/refresh_token',methods=['POST'])
 def refresh_token():
-    if request.cookies.get('doc_refresh_token') and request.headers['doc_csrf_access_token']:
-        d_token,dc_token = request.cookies.get('doc_refresh_token'),request.headers['doc_csrf_access_token']
-        # try to decode 
+    if request.cookies.get('doc_refresh_token') and request.headers['doc_csrf_refresh_token']:
+        d_token,dc_token = request.cookies.get('doc_refresh_token'),request.headers['doc_csrf_refresh_token']
+        # try to decode
+        print(d_token)
+        print('\n')
+        print(dc_token)
         try:
-            token_data = d_token.decode(current_app.config['SECRET_KEY'])['doc_id']
-            refresh_token_data = dc_token.decode(current_app.config['SECRET_KEY'])['uid']
+            token_data = jwt.decode(d_token,current_app.config['KEY'])['doc_id']
+            refresh_token_data = jwt.decode(dc_token,current_app.config['KEY'])['uid']
+            print(isinstance(refresh_token_data,type(uuid.uuid4())))
         except InvalidSignatureError or ExpiredSignatureError as e:
+            raise e
             return make_response(jsonify({"error":"Problem decoding token"}),500)
-            pass
 
-        new_access_token = jwt.encode({'doc_id':token_data,'exp':d.datetime.utcnow() + d.timedelta(minutes=60)},current_app.config['SECRET_KEY']).decode('utf-8')
+        new_access_token = jwt.encode({'doc_id':token_data,'exp':d.datetime.utcnow() + d.timedelta(minutes=60)},current_app.config['KEY']).decode('utf-8')
         # validate csrf token
-        if isinstance(refresh_token_data,uuid.uuid4):
+        if isinstance(refresh_token_data,type(uuid.uuid4())):
             uid = str(uuid.uuid4())
-            new_csrf_token = jwt.encode({'uid':uid,'exp':d.datetime.utcnow() + d.timedelta(minutes=60)},current_app.config['SECRET_KEY']).decode('utf-8')
-        resp = make_response(jsonify({'refresh':successful,'dc_token':new_csrf_token}),200)
-        resp.set_cookie('doc_access_token',value=new_access_token,httponly=True)
-
-        return resp
+            new_csrf_token = jwt.encode({'uid':uid,'exp':d.datetime.utcnow() + d.timedelta(minutes=60)},current_app.config['KEY']).decode('utf-8')
+            resp = make_response(jsonify({'refresh':'successful','dc_token':new_csrf_token}),200)
+            resp.set_cookie('doc_access_token',value=new_access_token,httponly=True)
+            return resp
+        else:
+            return jsonify({'error':'Invalid Token'}),401
+    else:
+        return jsonify({'Error':'Token missing'}),404
 
 @doctor.route('/add_remark',methods=['POST'])
 @login_required

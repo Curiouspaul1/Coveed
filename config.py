@@ -5,7 +5,7 @@ basedir = os.getcwd()
 
 class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = os.getenv("SECRET_KEY")
+    KEY = os.environ['APP_KEY']
     ADMIN_EMAIL = ''
     APP_EMAIL = os.environ.get('APP_EMAIL')
     AGENT_EMAILS = os.environ.get('AGENT_EMAILS')

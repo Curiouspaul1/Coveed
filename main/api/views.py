@@ -119,7 +119,7 @@ def user_symptoms(current_user):
 @api.route('/signup',methods=['POST'])
 def signup():
     data = request.get_json(force=True)
-    if 'access-token' in data:
+    if 'access-token' in request.headers:
         uid = auth.verify_id_token(data['access-token'])
         uid = uid['user_id']
         try:

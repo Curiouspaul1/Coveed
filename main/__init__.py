@@ -11,7 +11,7 @@ import logging
 def __call__(config_object):
     app = Flask(__name__)
     app.config.from_object(config[config_object])
-    app.config['SECRET_KEY'] = os.urandom(24)
+    app.config['KEY'] = os.urandom(24)
 
     db.init_app(app)
     ma.init_app(app)

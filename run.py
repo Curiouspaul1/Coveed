@@ -11,6 +11,8 @@ app = __call__(os.getenv("FLASK_CONFIG") or "default")
 migrate = Migrate(app,db)
 
 key = app.config['F_KEY']
+if type(key) != str():
+    os.environ['APP_KEY']
 email = app.config['CLIENT_EMAIL']
 
 cred = credentials.Certificate(
