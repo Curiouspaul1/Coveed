@@ -10,6 +10,7 @@ class User(db.Model):
     profile_pic = db.Column(db.String(200))
     tel = db.Column(db.String(50))
     country = db.Column(db.String(50))
+    countryVisited = db.Column(db.String(50))
     state = db.Column(db.String(50))
     address = db.Column(db.String(200))
     travel_history = db.Column(db.Boolean,default=False)

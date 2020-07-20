@@ -77,8 +77,8 @@ def add_profile(current_user):
     state = payload['state']
     address = payload['address']
     age = payload['age']
-
-    user.email,user.tel,user.country,user.state,user.address,user.age = email,tel,country,state,address,age
+    countryVisited = payload['countryVisited']
+    user.email,user.countryVisited,user.tel,user.country,user.state,user.address,user.age = email,tel,country,state,address,age
     db.session.commit()
 
     return make_response(jsonify({"msg":"Profile updated successfully"}),200)
