@@ -2,13 +2,15 @@ from . import doctor
 from flask import request,make_response,jsonify,current_app,json,session,g,request
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
-from main.models import User,Doctor,Comments
+from main.models import User,Doctor,Comments,Guides
 from main.schema import users_schema,doc_schema,docs_schema,comment_schema,comments_schema
 from firebase_admin import auth
+from jwt.exceptions import InvalidSignatureError,ExpiredSignatureError
 import jwt
 import datetime as d
-import re
+import re,os
 import uuid
+from uuid import UUID
 from functools import wraps
 
 @doctor.route('/register',methods=['POST'])
@@ -18,7 +20,7 @@ def register():
     db.session.add(doc)
     doc.genId()
     db.session.commit()
-    resp = jsonify({'register':True})
+    resp = jsonify({'pass':doc.doc_pass})
     return resp,200
 
 # regex validates doc-pass
@@ -39,12 +41,24 @@ def login():
         if not doc:
             return make_response(jsonify({'error':'Doc with id not found'}),404)
         else:
-            token = jwt.encode({'doc_id':doc.doc_id,'exp':d.datetime.utcnow() + d.timedelta(minutes=30)},'secret').decode('utf-8')
-            resp = make_response(jsonify({'login':True}),200)
-            resp.set_cookie('doc-access-token',value=str(token),httponly=True)
-            return make_response(jsonify({'Login':True}),200)
+            # Xss Tokens
+            key = os.environ['APP_KEY']
+            access_token = jwt.encode({'doc_id':doc.doc_id,'exp':d.datetime.utcnow() + d.timedelta(minutes=60)},key)
+            refresh_token = jwt.encode({'doc_id':doc.doc_id,'exp':d.datetime.utcnow()+d.timedelta(days=30)},key)
+            #CSRF Tokens
+            uid = str(uuid.uuid4())
+            csrf_access_token = jwt.encode({'uid':uid,'exp':d.datetime.utcnow()+d.timedelta(minutes=60)},key).decode('utf-8')
+            csrf_refresh_token = jwt.encode({'uid':uid,'exp':d.datetime.utcnow()+d.timedelta(days=30)},key).decode('utf-8')
+            print(csrf_access_token,csrf_refresh_token)
+            resp = make_response(jsonify({'login':True,'dc_token':str(csrf_access_token),'dc_refresh_token':str(csrf_refresh_token)}),200)
+            #XSS Cookies
+            resp.set_cookie('doc_access_token',value=access_token,httponly=True)
+            resp.set_cookie('doc_refresh_token',value=refresh_token,httponly=True)
+            #CSRF Cookies
+            return resp
     else:
         return make_response(jsonify({'error':'Invalid id'}),401)
+    return make_response(jsonify({'Login':True}),200)
 
 # authorization decor
 def login_required(f):
@@ -52,13 +66,12 @@ def login_required(f):
     @wraps(f)
     def function(*args,**kwargs):
         token = None
-        if 'doc-access-token' in request.cookies:
-            token = request.cookies.get('doc-access-token')
-            print(token)
+        if 'doc_access_token' in request.cookies and 'doc_csrf_access_token' in request.headers:
+            token = request.cookies.get('doc_access_token')
             try:
-                token = jwt.decode(token,'secret')
+                token = jwt.decode(token,os.environ['APP_KEY'])
                 # find doc
-                doc = Doctor.query.filter_by(doc_id=token['uid']).first()
+                doc = Doctor.query.filter_by(doc_id=token['doc_id']).first()
                 if doc:
                     return f(doc,*args,**kwargs)
                 else:
@@ -69,6 +82,32 @@ def login_required(f):
         else:
             return make_response(jsonify({'Token':'Missing'}),401)
     return function
+    
+
+@doctor.route('/refresh_token',methods=['POST'])
+def refresh_token():
+    if request.cookies.get('doc_refresh_token') and request.headers['doc_csrf_refresh_token']:
+        d_token,dc_token = request.cookies.get('doc_refresh_token'),request.headers['doc_csrf_refresh_token']
+        # try to decode
+        try:
+            token_data = jwt.decode(d_token,os.environ['APP_KEY'])['doc_id']
+            refresh_token_data = jwt.decode(dc_token,os.environ['APP_KEY'])['uid']
+        except InvalidSignatureError or ExpiredSignatureError as e:
+            raise e
+            return make_response(jsonify({"error":"Problem decoding token"}),500)
+
+        new_access_token = jwt.encode({'doc_id':token_data,'exp':d.datetime.utcnow() + d.timedelta(minutes=60)},os.environ['APP_KEY']).decode('utf-8')
+        # validate csrf token
+        if isinstance(UUID(refresh_token_data),type(uuid.uuid4())):
+            uid = str(uuid.uuid4())
+            new_csrf_token = jwt.encode({'uid':uid,'exp':d.datetime.utcnow() + d.timedelta(minutes=60)},os.environ['APP_KEY']).decode('utf-8')
+            resp = make_response(jsonify({'refresh':'successful','dc_token':new_csrf_token}),200)
+            resp.set_cookie('doc_access_token',value=new_access_token,httponly=True)
+            return resp
+        else:
+            return jsonify({'error':'Invalid Token'}),401
+    else:
+        return jsonify({'Error':'Token missing'}),404
 
 @doctor.route('/add_remark',methods=['POST'])
 @login_required
@@ -153,7 +192,7 @@ def add_prescription(doc):
     user = User.query.filter_by(user_id=data['user_id']).first()
     guide = Guides.query.filter_by(name=data['name']).first()
     if guide is None:
-        guide = Guides(name=name,info=data[0],time_lapse=data[1],doctor=Doctor.query.filter_by(doc_id=doc.id).first())
+        guide = Guides(name=data['name'],info=data['info'][0][1]+'\n'+data['info'][0][1]+'\n'+data['info'][0][2],time_lapse=data['info'][1],doctor=doc)
         db.session.add(guide)
         db.session.commit()
     try:
