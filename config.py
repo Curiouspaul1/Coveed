@@ -9,7 +9,7 @@ class Config:
     ADMIN_EMAIL = ''
     APP_EMAIL = os.environ.get('APP_EMAIL')
     AGENT_EMAIL = os.environ.get('AGENT_EMAIL')
-    F_KEY = os.environ['FIREBASE_KEY']
+    F_KEY = os.environ['FIREBASE_KEY'].replace('\\n','\n')
     CLIENT_EMAIL = os.environ['FIREBASE_CLIENT_EMAIL']
 
 class DevelopmentConfig(Config):
