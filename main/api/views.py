@@ -13,46 +13,26 @@ from functools import wraps
 import datetime as d
 import uuid
 
-@api.route('/login',methods=['POST'])
-def login():
-    """
-    if request.method == 'GET':
-        user = User.quer.filter_by(username=username).first()
-        if user:
-            return make_response(jsonify({"signup_method":user.sign_up_method}),200)
-        return make_response("No user with username found",401)
-    """
-    data = request.get_json()
-    if 'access-token' in data:
-        token = data['access-token']
-        try:
-            decoded_token = auth.verify_id_token(token)
-            ##decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
-        except Exception as e:
-            raise e
-            return make_response(jsonify({'error':'An error occured while trying to decode token'}),500)
-        uid = decoded_token['uid']
-    # find user with id
-    user = User.query.filter_by(user_id=uid).first()
-    if user:
-        #session['user_id'] = user_id
-        return make_response(jsonify({'msg':'verified user successfully'}),200)
-    return make_response(jsonify({'error':'no user with such id found'}),400)
-
+# SignIn required Decorator For Authorization Purposes
 def login_required(f):
     @wraps(f)
     def function(*args,**kwargs):
         token = None
         if 'access-token' in request.headers:
             token = request.headers['access-token']
-            decoded_token = auth.verify_id_token(token)
-            #decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
+            try:
+                decoded_token = auth.verify_id_token(token)
+                uid = decoded_token['uid']
+                # find user with id
+                current_user = User.query.filter_by(user_id=uid).first()
+                if current_user:
+                    return f(current_user,*args,**kwargs)
+                else:
+                    return jsonify({"Error":"No such user found"}),404
+            except auth.ExpiredIdTokenError:
+                return jsonify({"Error":"Token is Expired"}),401
         else:
             return make_response(jsonify({'error':'token not found'}),404)
-        uid = decoded_token['uid']
-        # find user with id
-        current_user = User.query.filter_by(user_id=uid).first()
-        return f(current_user,*args,**kwargs)
     return function
         
 #@api.before_request
