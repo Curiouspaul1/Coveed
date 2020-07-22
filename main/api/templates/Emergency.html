@@ -1,11 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emergency Report!</title>
-</head>
-<body>
-    This is a test Emergency mail
-</body>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<title>Coveed Emergency Report</title>
+		<link rel="stylesheet" href="email.css" />
+		<link rel="stylesheet" href="{{url_for('static',filename='email.css')}}">
+	</head>
+	<body>
+		<div id="main-field">
+			<div id="sender-field">
+				<p id="sender-tag">D</p>
+				<div id="sender-name">
+					<p>Coveed-Report</p>
+					<p>to me</p>
+					<p>9 july view details</p>
+				</div>
+			</div>
+			<p id="emergency-level">Emergency</p>
+			<p id="message-content">
+				&nbsp; &nbsp; &nbsp; &nbsp; A patient just recently requested to contact emergency. Please find the attached file containing the details of the patient<br />
+				Thanks<br />
+				Best Regards.
+			</p>
+			<div id="footer">
+				<div><img src="{{url_for('static',filename='reply.png')}}" alt="" id="footer-image" /> <p>reply</p> </div>
+				<div><img src="{{url_for('static',filename='forward.png')}}" alt="" id="footer-image" /><p>forward</p> </div>
+				<div><img src="{{url_for('static',filename='archive.png')}}" alt="" id="footer-image" /><p>archive</p> </div>
+				<div><img src="{{url_for('static',filename='trash.jpeg')}}" alt="" id="footer-image" /><p>delete</p> </div>
+			</div>
+		</div>
+	</body>
 </html>

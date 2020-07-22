@@ -31,7 +31,7 @@ def EmergencyMail(mail_subject,html_content,file_path):
     attachment.content_id = ContentId('TestId')
     message.attachment = attachment
     try:
-        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        sg = SendGridAPIClient(os.environ['SENDGRID_API_KEY'])
         resp = sg.send(message)
         return True
     except URLError as e:
