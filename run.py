@@ -11,6 +11,8 @@ app = __call__(os.getenv("FLASK_CONFIG") or "default")
 migrate = Migrate(app,db)
 
 key = app.config['F_KEY']
+key_id = os.environ['private_key_id']
+client_id = os.environ['client_id']
 if type(key) != str():
     os.environ['SECRET_KEY']
 email = app.config['CLIENT_EMAIL']
@@ -19,10 +21,10 @@ cred = credentials.Certificate(
     {
         "type": "service_account",
         "project_id": "coveed-19",
-        "private_key_id": "f8a920fad14bf6368832e2cd58baa7f3159dad4f",
+        "private_key_id": key_id,
         "private_key":key,
         "client_email": email,
-        "client_id": "106525062045074392577",
+        "client_id": client_id,
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
