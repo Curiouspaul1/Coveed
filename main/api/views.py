@@ -46,6 +46,7 @@ def login_required(f):
         token = None
         if 'access-token' in request.headers:
             token = request.headers['access-token']
+            print(token)
             decoded_token = auth.verify_id_token(token)
             #decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
         else:
@@ -78,7 +79,7 @@ def add_profile(current_user):
     address = payload['address']
     age = payload['age']
     countryVisited = payload['countryVisited']
-    user.email,user.countryVisited,user.tel,user.country,user.state,user.address,user.age = email,tel,country,state,address,age
+    user.email,user.countryVisited,user.tel,user.country,user.state,user.address,user.age = email,countryVisited,tel,country,state,address,age
     db.session.commit()
 
     return make_response(jsonify({"msg":"Profile updated successfully"}),200)
@@ -120,10 +121,11 @@ def user_symptoms(current_user):
 def signup():
     data = request.get_json(force=True)
     if 'access-token' in request.headers:
-        uid = auth.verify_id_token(data['access-token'])
+        print(request.headers['access-token'])
+        uid = auth.verify_id_token(request.headers['access-token'])
         uid = uid['user_id']
         try:
-           new_user = User(first_name=data['firstName'],last_name=data['lastName'],sign_up_date=d.datetime.utcnow(),user_id=uid,sign_up_method=data["signUpMethod"])
+           new_user = User(first_name=data['firstName'],last_name=data['lastName'],profile_pic=data['image_url'],sign_up_date=d.datetime.utcnow(),user_id=uid,sign_up_method=data["signUpMethod"])
            if 'telephone' in data.keys():
                 new_user.tel = data['telephone']
            else:

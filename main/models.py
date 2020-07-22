@@ -65,7 +65,7 @@ class Symptoms(db.Model):
     resp = db.Column(db.Boolean,default=False)
     fever = db.Column(db.Boolean,default=False)
     fatigue = db.Column(db.Boolean,default=False)
-    other = db.Column(db.Boolean,default=False)
+    other = db.Column(db.String(100))
     date_added = db.Column(db.DateTime())
     user_id = db.Column(db.Integer,db.ForeignKey('user.id'))
     specifics = db.relationship('Specifics',backref='symptom',uselist=False)

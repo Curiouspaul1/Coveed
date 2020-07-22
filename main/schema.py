@@ -42,7 +42,7 @@ docs_schema = DoctorSchema(many=True)
 
 class UserSchema(ma.Schema):
     class Meta:
-        fields = ('id','med_state','remarks','symptoms','days_left','guides','name','email','username','tel','country','state','travel_history','address','age','sign_up_date','first_name','last_name','user_id')
+        fields = ('id','med_state','remarks','profile_pic','symptoms','days_left','guides','name','email','username','tel','country','state','travel_history','address','age','sign_up_date','first_name','last_name','user_id')
 
     symptoms = ma.Nested(SymptomSchema,many=True)
     guides = ma.Nested(GuideSchema,many=True)
