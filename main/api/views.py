@@ -122,11 +122,10 @@ def user_symptoms(current_user):
 def signup():
     data = request.get_json(force=True)
     if 'access-token' in request.headers:
-        print(request.headers['access-token'])
         uid = auth.verify_id_token(request.headers['access-token'])
         uid = uid['user_id']
         try:
-           new_user = User(first_name=data['firstName'],last_name=data['lastName'],profile_pic=data['image_url'],sign_up_date=d.datetime.utcnow(),user_id=uid,sign_up_method=data["signUpMethod"],email=data['email'],tel=data['tel'],country=data['country'],countryVisted=data['countryVisited'],address=data['address'],state=data['state'],travel_history=data['travel_history'],age=data['age'])
+           new_user = User(first_name=data['firstName'],last_name=data['lastName'],profile_pic=data['image_url'],sign_up_date=d.datetime.utcnow(),user_id=uid,sign_up_method=data["signUpMethod"],email=data['email'],tel=data['tel'],country=data['country'],countryVisited=data['countryVisited'],address=data['address'],state=data['state'],travel_history=data['travel_history'],age=data['age'])
            db.session.add(new_user)
            db.session.commit()
            return make_response(jsonify({"Sign Up":"Successful"}),200)
