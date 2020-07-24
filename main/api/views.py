@@ -78,6 +78,7 @@ def add_profile(current_user):
     state = payload['state']
     address = payload['address']
     age = payload['age']
+    travel_history = payload['travel_history']
     countryVisited = payload['countryVisited']
     user.email,user.countryVisited,user.tel,user.country,user.state,user.address,user.age = email,countryVisited,tel,country,state,address,age
     db.session.commit()
@@ -125,11 +126,7 @@ def signup():
         uid = auth.verify_id_token(request.headers['access-token'])
         uid = uid['user_id']
         try:
-           new_user = User(first_name=data['firstName'],last_name=data['lastName'],profile_pic=data['image_url'],sign_up_date=d.datetime.utcnow(),user_id=uid,sign_up_method=data["signUpMethod"])
-           if 'telephone' in data.keys():
-                new_user.tel = data['telephone']
-           else:
-                pass
+           new_user = User(first_name=data['firstName'],last_name=data['lastName'],profile_pic=data['image_url'],sign_up_date=d.datetime.utcnow(),user_id=uid,sign_up_method=data["signUpMethod"],email=data['email'],tel=data['tel'],country=data['country'],countryVisted=data['countryVisited'],address=data['address'],state=data['state'],travel_history=data['travel_history'],age=data['age'])
            db.session.add(new_user)
            db.session.commit()
            return make_response(jsonify({"Sign Up":"Successful"}),200)
