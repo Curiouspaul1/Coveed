@@ -96,19 +96,19 @@ def user_symptoms(current_user):
 @api.route('/signup',methods=['POST'])
 def signup():
     data = request.get_json(force=True)
-    if 'access-token' in data:
-        token = data['access-token']
-        decoded_token = auth.verify_id_token(token)
+    if 'access-token' in request.headers:
+        uid = auth.verify_id_token(request.headers['access-token'])
+        uid = uid['user_id']
         try:
-            new_user = User(first_name=data['firstName'],last_name=data['lastName'],user_id=decoded_token['uid'],sign_up_method=data["signUpMethod"])
-            if data['telephone']:
-                new_user.tel = data['telephone']
-            db.session.add(new_user)
-            db.session.commit()
-            return make_response(jsonify({"messsage":"Sign up successful"}),200)
+           new_user = User(first_name=data['firstName'],last_name=data['lastName'],profile_pic=data['image_url'],sign_up_date=d.datetime.utcnow(),user_id=uid,sign_up_method=data["signUpMethod"],email=data['email'],tel=data['tel'],country=data['country'],countryVisited=data['countryVisited'],address=data['address'],state=data['state'],travel_history=data['travel_history'],age=data['age'])
+           db.session.add(new_user)
+           db.session.commit()
+           return make_response(jsonify({"Sign Up":"Successful"}),200)
         except IntegrityError:
             return make_response(jsonify({"message":"User_id already exists"}),401)
-
+    else:
+        return jsonify({'Error':'Token is missing'}),401
+        
 @api.route('/getuser')
 def getuser(current_user):
     user = User.query.filter_by(user_id=current_user.user_id).first()
