@@ -1,12 +1,13 @@
 from . import api
 import json
-from flask import request,make_response,jsonify,current_app,json,session,g,request
+from flask import render_template,request,make_response,jsonify,current_app,json,session,g,request
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
 from main.api.email_service import EmergencyMail
 from main.models import User,Symptoms,Specifics,Permission,Doctor
-from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,specific_schema,specifics_schema
+from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,specific_schema,specifics_schema,comment_schema,comments_schema
 from firebase_admin import auth
+from tablib import Dataset
 import firebase_admin
 import jwt, os
 from functools import wraps
@@ -110,6 +111,7 @@ def signup():
         return jsonify({'Error':'Token is missing'}),401
         
 @api.route('/getuser')
+@login_required
 def getuser(current_user):
     user = User.query.filter_by(user_id=current_user.user_id).first()
     if not user:
