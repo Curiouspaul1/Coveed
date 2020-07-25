@@ -1,58 +1,39 @@
 from . import api
 import json
-from flask import request,make_response,jsonify,current_app,json,session,g,request
+from flask import render_template,request,make_response,jsonify,current_app,json,session,g,request
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
 from main.api.email_service import EmergencyMail
 from main.models import User,Symptoms,Specifics,Permission,Doctor
-from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,specific_schema,specifics_schema
+from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,specific_schema,specifics_schema,comment_schema,comments_schema
 from firebase_admin import auth
+from tablib import Dataset
 import firebase_admin
 import jwt, os
 from functools import wraps
 import datetime as d
 import uuid
 
-@api.route('/login',methods=['POST'])
-def login():
-    """
-    if request.method == 'GET':
-        user = User.quer.filter_by(username=username).first()
-        if user:
-            return make_response(jsonify({"signup_method":user.sign_up_method}),200)
-        return make_response("No user with username found",401)
-    """
-    data = request.get_json()
-    if 'access-token' in data:
-        token = data['access-token']
-        try:
-            decoded_token = auth.verify_id_token(token)
-            ##decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
-        except Exception as e:
-            raise e
-            return make_response(jsonify({'error':'An error occured while trying to decode token'}),500)
-        uid = decoded_token['uid']
-    # find user with id
-    user = User.query.filter_by(user_id=uid).first()
-    if user:
-        #session['user_id'] = user_id
-        return make_response(jsonify({'msg':'verified user successfully'}),200)
-    return make_response(jsonify({'error':'no user with such id found'}),400)
-
+# SignIn required Decorator For Authorization Purposes
 def login_required(f):
     @wraps(f)
     def function(*args,**kwargs):
         token = None
         if 'access-token' in request.headers:
             token = request.headers['access-token']
-            decoded_token = auth.verify_id_token(token)
-            #decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
+            try:
+                decoded_token = auth.verify_id_token(token)
+                uid = decoded_token['uid']
+                # find user with id
+                current_user = User.query.filter_by(user_id=uid).first()
+                if current_user:
+                    return f(current_user,*args,**kwargs)
+                else:
+                    return jsonify({"Error":"No such user found"}),404
+            except auth.ExpiredIdTokenError:
+                return jsonify({"Error":"Token is Expired"}),401
         else:
             return make_response(jsonify({'error':'token not found'}),404)
-        uid = decoded_token['uid']
-        # find user with id
-        current_user = User.query.filter_by(user_id=uid).first()
-        return f(current_user,*args,**kwargs)
     return function
         
 #@api.before_request
@@ -116,20 +97,21 @@ def user_symptoms(current_user):
 @api.route('/signup',methods=['POST'])
 def signup():
     data = request.get_json(force=True)
-    if 'access-token' in data:
-        token = data['access-token']
-        decoded_token = auth.verify_id_token(token)
+    if 'access-token' in request.headers:
+        uid = auth.verify_id_token(request.headers['access-token'])
+        uid = uid['user_id']
         try:
-            new_user = User(first_name=data['firstName'],last_name=data['lastName'],user_id=decoded_token['uid'],sign_up_method=data["signUpMethod"])
-            if data['telephone']:
-                new_user.tel = data['telephone']
-            db.session.add(new_user)
-            db.session.commit()
-            return make_response(jsonify({"messsage":"Sign up successful"}),200)
+           new_user = User(first_name=data['firstName'],last_name=data['lastName'],profile_pic=data['image_url'],sign_up_date=d.datetime.utcnow(),user_id=uid,sign_up_method=data["signUpMethod"],email=data['email'],tel=data['tel'],country=data['country'],countryVisited=data['countryVisited'],address=data['address'],state=data['state'],travel_history=data['travel_history'],age=data['age'])
+           db.session.add(new_user)
+           db.session.commit()
+           return make_response(jsonify({"Sign Up":"Successful"}),200)
         except IntegrityError:
             return make_response(jsonify({"message":"User_id already exists"}),401)
-
+    else:
+        return jsonify({'Error':'Token is missing'}),401
+        
 @api.route('/getuser')
+@login_required
 def getuser(current_user):
     user = User.query.filter_by(user_id=current_user.user_id).first()
     if not user:
@@ -206,3 +188,14 @@ def emergency(current_user):
             raise e
             return jsonify({'Sent Email':False}),500
         file.close()
+
+@api.route('/user_image',methods=['PUT'])
+@login_required
+def add_profile_photo(current_user):
+    url = request.get_json(force=True)
+    current_user.profile_pic = url['image_url']
+    try:
+        db.session.commit()
+    except Exception as e:
+        return jsonify({'Error':'Somehting went wrong'},500)
+    return jsonify({'profile_pic uploaded successfully'}),200

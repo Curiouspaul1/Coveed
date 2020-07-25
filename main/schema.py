@@ -23,7 +23,7 @@ class GuideSchema(ma.Schema):
 
 class UserSchema(ma.Schema):
     class Meta:
-        fields = ('id','symptoms','days_left','guides','name','email','username','tel','country','state','address','age','sign_up_date','first_name','last_name','user_id')
+        fields = ('id','profile_pic','travel_history','symptoms','days_left','guides','name','email','username','tel','country','state','address','age','sign_up_date','first_name','last_name','user_id')
 
     symptoms = ma.Nested(SymptomSchema,many=True)
     guides = ma.Nested(GuideSchema,many=True)
