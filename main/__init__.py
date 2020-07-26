@@ -2,8 +2,6 @@
 
 from flask import Flask
 from .extensions import db,ma,cors
-import firebase_admin
-from firebase_admin import credentials
 from config import config
 import os
 import logging

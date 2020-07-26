@@ -6,7 +6,6 @@ from main.models import (
 import datetime as d
 
 
-
 def test_role(test_client):
     db.create_all()
 
