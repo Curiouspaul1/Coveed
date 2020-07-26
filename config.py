@@ -9,8 +9,8 @@ class Config:
     ADMIN_EMAIL = ''
     APP_EMAIL = os.environ.get('APP_EMAIL')
     AGENT_EMAILS = os.environ.get('AGENT_EMAILS')
-    F_KEY = os.environ['FIREBASE_KEY'].replace('\\n','\n')
-    CLIENT_EMAIL = os.environ['FIREBASE_CLIENT_EMAIL']
+    #F_KEY = os.environ['FIREBASE_KEY'].replace('\\n','\n')
+    #CLIENT_EMAIL = os.environ['FIREBASE_CLIENT_EMAIL']
 
 class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir,'coveed-dev.sqlite') or os.getenv('DEV_URI')
