@@ -138,6 +138,12 @@ db.Column('user_id', db.Integer,db.ForeignKey('user.id')),
 db.Column('guide_id', db.Integer, db.ForeignKey('guides.id'))
 )
 
+class Patients():
+    __tablename__ = 'patients'
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    guide_id = db.Column(db.Integer, db.ForeignKey('guide_id'))
+
+
 class Guides(db.Model):
     id = db.Column(db.Integer,primary_key=True,nullable=False)
     name = db.Column(db.String(100))

@@ -13,6 +13,10 @@ from functools import wraps
 import datetime as d
 import uuid
 
+@api.route('/index')
+def index():
+    return f'Hello pytest'
+
 @api.route('/login',methods=['POST'])
 def login():
     """
