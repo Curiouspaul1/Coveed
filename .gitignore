@@ -8,3 +8,4 @@ data.json
 devsdb.sqlite
 user_dat.xlsx
 coveed-dev.sqlite-journal
+coveed-test.sqlite
