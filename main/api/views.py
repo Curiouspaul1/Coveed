@@ -133,7 +133,6 @@ def signup():
             return make_response(jsonify({"message":"User_id already exists"}),401)
     else:
         return jsonify({'Error':'Token is missing'}),401
-
 @api.route('/getuser')
 @login_required
 def getuser(current_user):
