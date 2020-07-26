@@ -12,10 +12,6 @@ def __call__(config_object):
 
     db.init_app(app)
     ma.init_app(app)
-<<<<<<< HEAD
-    #firebase_admin.initialize_app()
-=======
->>>>>>> 412787909fb42aa332016699217946809d9228d8
     cors.init_app(app, resources={r"/api/*":{"origins":"*"},r"/doctors/*":{"origins":"*"}})
 
     # register blurprint
