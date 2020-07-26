@@ -7,8 +7,10 @@ class User(db.Model):
     first_name = db.Column(db.String(100))
     last_name = db.Column(db.String(100))
     email = db.Column(db.String(100))
+    profile_pic = db.Column(db.String(200))
     tel = db.Column(db.String(50))
     country = db.Column(db.String(50))
+    countryVisited = db.Column(db.String(50))
     state = db.Column(db.String(50))
     address = db.Column(db.String(200))
     travel_history = db.Column(db.Boolean,default=False)
@@ -28,7 +30,7 @@ class User(db.Model):
         sdate = self.symptoms[0].date_added 
         t_lapse = sdate + d.timedelta(weeks=2)
         remaining = t_lapse - self.symptoms[-1].date_added
-        self.days_left = remaining
+        self.days_left = remaining.days
         
     def set_critical_state(self):
         self.med_state = 'Critical'
@@ -63,7 +65,7 @@ class Symptoms(db.Model):
     resp = db.Column(db.Boolean,default=False)
     fever = db.Column(db.Boolean,default=False)
     fatigue = db.Column(db.Boolean,default=False)
-    other = db.Column(db.String(200))
+    other = db.Column(db.String(100))
     date_added = db.Column(db.DateTime())
     user_id = db.Column(db.Integer,db.ForeignKey('user.id'))
     specifics = db.relationship('Specifics',backref='symptom',uselist=False)
@@ -137,11 +139,6 @@ patients = db.Table('patients',
 db.Column('user_id', db.Integer,db.ForeignKey('user.id')),
 db.Column('guide_id', db.Integer, db.ForeignKey('guides.id'))
 )
-
-class Patients():
-    __tablename__ = 'patients'
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    guide_id = db.Column(db.Integer, db.ForeignKey('guide_id'))
 
 
 class Guides(db.Model):
