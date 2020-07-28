@@ -225,5 +225,5 @@ def add_profile_photo(current_user):
     try:
         db.session.commit()
     except Exception as e:
-        return jsonify({'Error':'Somehting went wrong'},500)
-    return jsonify({'profile_pic uploaded successfully':}),200
+        return jsonify({'Error':'Something went wrong'},500)
+    return jsonify({'profile_pic uploaded successfully':True}),200
