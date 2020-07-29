@@ -222,6 +222,7 @@ def emergency(current_user):
 def add_profile_photo(current_user):
     url = request.get_json(force=True)
     current_user.profile_pic = url['image_url']
+    print(url['image_url'])
     try:
         db.session.commit()
     except Exception as e:
