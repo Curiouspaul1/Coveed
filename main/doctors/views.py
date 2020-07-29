@@ -66,7 +66,7 @@ def login_required(f):
     @wraps(f)
     def function(*args,**kwargs):
         token = None
-        if 'doc_access_token' in request.cookies and 'doc_csrf_access_token' in request.headers:
+        if 'dc_token' in request.cookies and 'doc_csrf_access_token' in request.headers:
             token = request.cookies.get('doc_access_token')
             try:
                 token = jwt.decode(token,os.environ['APP_KEY'])
