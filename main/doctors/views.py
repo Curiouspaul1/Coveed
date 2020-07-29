@@ -58,7 +58,7 @@ def login():
             return resp
     else:
         return make_response(jsonify({'error':'Invalid id'}),401)
-    return make_response(jsonify({'Login':True}),200)
+
 
 # authorization decor
 def login_required(f):
