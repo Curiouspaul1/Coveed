@@ -43,6 +43,7 @@ def login():
 def login_required(f):
     @wraps(f)
     def function(*args,**kwargs):
+        print(request.headers)
         token = None
         if 'access-token' in request.headers:
             token = request.headers['access-token']
