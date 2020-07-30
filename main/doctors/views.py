@@ -113,10 +113,8 @@ def refresh_token():
         return jsonify({'Error':'Token missing'}),404
 
 @doctor.route('/add_remark',methods=['POST'])
-
 @cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 @login_required
-
 def comment(doc):
     data = request.get_json()
     content = data['comment']
@@ -128,11 +126,8 @@ def comment(doc):
     return resp,200
 
 @doctor.route('/delete_remark/<remark_id>',methods=['DELETE'])
-
 @cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 @login_required
-
-
 def delete_comment(doc,remark_id):
     comment = Comments.query.filter_by(id=remark_id).first()
     db.session.delete(comment)
@@ -143,11 +138,8 @@ def delete_comment(doc,remark_id):
     return resp,200
 
 @doctor.route('/edit_remark/<remark_id>',methods=['PUT'])
-
 @cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 @login_required
-
-
 def edit_comment(doc,remark_id):
     data = request.get_json()
     # fetch comment
@@ -161,11 +153,8 @@ def edit_comment(doc,remark_id):
     return make_response(jsonify({'Edit':True}),200)
 
 @doctor.route('/getpatients')
-
 @cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 @login_required
-
-
 def getpatients(doc):
     users = User.query.filter_by(days_left=0).all()
     print(users)
@@ -174,11 +163,8 @@ def getpatients(doc):
     return resp,200
 
 @doctor.route('/fetchcomments')
-
 @cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 @login_required
-
-
 def fetch_comments(doc):
     comments = doc.comments
     resp = jsonify({'comments':comments_schema.dump(comments)})
@@ -196,11 +182,8 @@ def fetchcomments(doc,user_id):
     return json.dumps(comments_schema.dump(result)),200
 
 @doctor.route('/flag',methods=['POST'])
-
 @cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 @login_required
-
-
 def flagcase(doc):
     data = request.get_json()
     # find user
@@ -212,11 +195,8 @@ def flagcase(doc):
         return jsonify({'Error':'An error occurred'}),500
 
 @doctor.route('/add_prescription',methods=['POST'])
-
 @cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 @login_required
-
-
 def add_prescription(doc):
     data = request.get_json(force=True)
     user = User.query.filter_by(user_id=data['user_id']).first()
