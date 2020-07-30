@@ -6,6 +6,7 @@ from main.models import User,Doctor,Comments,Guides
 from main.schema import users_schema,doc_schema,docs_schema,comment_schema,comments_schema
 from firebase_admin import auth
 from jwt.exceptions import InvalidSignatureError,ExpiredSignatureError
+from flask_cors import cross_origin
 import jwt
 import datetime as d
 import re,os
@@ -113,6 +114,7 @@ def refresh_token():
 
 @doctor.route('/add_remark',methods=['POST'])
 @login_required
+@cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 def comment(doc):
     data = request.get_json()
     content = data['comment']
@@ -125,6 +127,8 @@ def comment(doc):
 
 @doctor.route('/delete_remark/<remark_id>',methods=['DELETE'])
 @login_required
+
+@cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 def delete_comment(doc,remark_id):
     comment = Comments.query.filter_by(id=remark_id).first()
     db.session.delete(comment)
@@ -136,6 +140,8 @@ def delete_comment(doc,remark_id):
 
 @doctor.route('/edit_remark/<remark_id>',methods=['PUT'])
 @login_required
+
+@cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 def edit_comment(doc,remark_id):
     data = request.get_json()
     # fetch comment
@@ -150,6 +156,8 @@ def edit_comment(doc,remark_id):
 
 @doctor.route('/getpatients')
 @login_required
+
+@cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 def getpatients(doc):
     users = User.query.filter_by(days_left=0).all()
     print(users)
@@ -159,6 +167,8 @@ def getpatients(doc):
 
 @doctor.route('/fetchcomments')
 @login_required
+
+@cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 def fetch_comments(doc):
     comments = doc.comments
     resp = jsonify({'comments':comments_schema.dump(comments)})
@@ -177,6 +187,8 @@ def fetchcomments(doc,user_id):
 
 @doctor.route('/flag',methods=['POST'])
 @login_required
+
+@cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 def flagcase(doc):
     data = request.get_json()
     # find user
@@ -189,6 +201,8 @@ def flagcase(doc):
 
 @doctor.route('/add_prescription',methods=['POST'])
 @login_required
+
+@cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 def add_prescription(doc):
     data = request.get_json(force=True)
     user = User.query.filter_by(user_id=data['user_id']).first()
