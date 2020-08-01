@@ -53,8 +53,8 @@ def login():
             print(csrf_access_token,csrf_refresh_token)
             resp = make_response(jsonify({'login':True,'dc_token':str(csrf_access_token),'dc_refresh_token':str(csrf_refresh_token)}),200)
             #XSS Cookies
-            resp.set_cookie('doc_access_token',value=access_token,httponly=True)
-            resp.set_cookie('doc_refresh_token',value=refresh_token,httponly=True)
+            resp.set_cookie('doc_access_token',value=access_token,httponly=True,samesite='None')
+            resp.set_cookie('doc_refresh_token',value=refresh_token,httponly=True,samesite='None')
             #CSRF Cookies
             return resp
     else:
