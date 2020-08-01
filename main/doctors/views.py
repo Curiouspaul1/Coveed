@@ -6,6 +6,7 @@ from main.models import User,Doctor,Comments,Guides
 from main.schema import users_schema,doc_schema,docs_schema,comment_schema,comments_schema
 from firebase_admin import auth
 from jwt.exceptions import InvalidSignatureError,ExpiredSignatureError
+from flask_cors import cross_origin
 import jwt
 import datetime as d
 import re,os
@@ -52,13 +53,13 @@ def login():
             print(csrf_access_token,csrf_refresh_token)
             resp = make_response(jsonify({'login':True,'dc_token':str(csrf_access_token),'dc_refresh_token':str(csrf_refresh_token)}),200)
             #XSS Cookies
-            resp.set_cookie('doc_access_token',value=access_token,httponly=True)
-            resp.set_cookie('doc_refresh_token',value=refresh_token,httponly=True)
+            resp.set_cookie('doc_access_token',value=access_token,httponly=True,samesite='None',secure=True)
+            resp.set_cookie('doc_refresh_token',value=refresh_token,httponly=True,samesite='None',secure=True)
             #CSRF Cookies
             return resp
     else:
         return make_response(jsonify({'error':'Invalid id'}),401)
-    return make_response(jsonify({'Login':True}),200)
+
 
 # authorization decor
 def login_required(f):
@@ -66,8 +67,11 @@ def login_required(f):
     @wraps(f)
     def function(*args,**kwargs):
         token = None
+        print(request.cookies)
+      
         if 'doc_access_token' in request.cookies and 'doc_csrf_access_token' in request.headers:
             token = request.cookies.get('doc_access_token')
+            print(token)
             try:
                 token = jwt.decode(token,os.environ['APP_KEY'])
                 # find doc
@@ -110,6 +114,7 @@ def refresh_token():
         return jsonify({'Error':'Token missing'}),404
 
 @doctor.route('/add_remark',methods=['POST'])
+#@cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 @login_required
 def comment(doc):
     data = request.get_json()
@@ -122,6 +127,7 @@ def comment(doc):
     return resp,200
 
 @doctor.route('/delete_remark/<remark_id>',methods=['DELETE'])
+#@cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 @login_required
 def delete_comment(doc,remark_id):
     comment = Comments.query.filter_by(id=remark_id).first()
@@ -133,6 +139,7 @@ def delete_comment(doc,remark_id):
     return resp,200
 
 @doctor.route('/edit_remark/<remark_id>',methods=['PUT'])
+#@cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 @login_required
 def edit_comment(doc,remark_id):
     data = request.get_json()
@@ -147,6 +154,7 @@ def edit_comment(doc,remark_id):
     return make_response(jsonify({'Edit':True}),200)
 
 @doctor.route('/getpatients')
+#@cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 @login_required
 def getpatients(doc):
     users = User.query.filter_by(days_left=0).all()
@@ -156,6 +164,7 @@ def getpatients(doc):
     return resp,200
 
 @doctor.route('/fetchcomments')
+#@cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 @login_required
 def fetch_comments(doc):
     comments = doc.comments
@@ -174,6 +183,7 @@ def fetchcomments(doc,user_id):
     return json.dumps(comments_schema.dump(result)),200
 
 @doctor.route('/flag',methods=['POST'])
+#@cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 @login_required
 def flagcase(doc):
     data = request.get_json()
@@ -186,6 +196,7 @@ def flagcase(doc):
         return jsonify({'Error':'An error occurred'}),500
 
 @doctor.route('/add_prescription',methods=['POST'])
+#@cross_origin(allow_headers=['Access-Control-Allow-Credentials'])
 @login_required
 def add_prescription(doc):
     data = request.get_json(force=True)
