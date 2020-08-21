@@ -43,7 +43,7 @@ def login():
             return make_response(jsonify({'error':'Doc with id not found'}),404)
         else:
             # Xss Tokens
-            key = os.environ['APP_KEY']
+            key = os.environ['SECRET_KEY']
             access_token = jwt.encode({'doc_id':doc.doc_id,'exp':d.datetime.utcnow() + d.timedelta(minutes=60)},key)
             refresh_token = jwt.encode({'doc_id':doc.doc_id,'exp':d.datetime.utcnow()+d.timedelta(days=30)},key)
             #CSRF Tokens
