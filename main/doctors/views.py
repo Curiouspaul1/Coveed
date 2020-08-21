@@ -73,7 +73,7 @@ def login_required(f):
             token = request.cookies.get('doc_access_token')
             print(token)
             try:
-                token = jwt.decode(token,os.environ['APP_KEY'])
+                token = jwt.decode(token,os.environ['SECRET_KEY'])
                 # find doc
                 doc = Doctor.query.filter_by(doc_id=token['doc_id']).first()
                 if doc:
@@ -94,17 +94,17 @@ def refresh_token():
         d_token,dc_token = request.cookies.get('doc_refresh_token'),request.headers['doc_csrf_refresh_token']
         # try to decode
         try:
-            token_data = jwt.decode(d_token,os.environ['APP_KEY'])['doc_id']
-            refresh_token_data = jwt.decode(dc_token,os.environ['APP_KEY'])['uid']
+            token_data = jwt.decode(d_token,os.environ['SECRET_KEY'])['doc_id']
+            refresh_token_data = jwt.decode(dc_token,os.environ['SECRET_KEY'])['uid']
         except InvalidSignatureError or ExpiredSignatureError as e:
             raise e
             return make_response(jsonify({"error":"Problem decoding token"}),500)
 
-        new_access_token = jwt.encode({'doc_id':token_data,'exp':d.datetime.utcnow() + d.timedelta(minutes=60)},os.environ['APP_KEY']).decode('utf-8')
+        new_access_token = jwt.encode({'doc_id':token_data,'exp':d.datetime.utcnow() + d.timedelta(minutes=60)},os.environ['SECRET_KEY']).decode('utf-8')
         # validate csrf token
         if isinstance(UUID(refresh_token_data),type(uuid.uuid4())):
             uid = str(uuid.uuid4())
-            new_csrf_token = jwt.encode({'uid':uid,'exp':d.datetime.utcnow() + d.timedelta(minutes=60)},os.environ['APP_KEY']).decode('utf-8')
+            new_csrf_token = jwt.encode({'uid':uid,'exp':d.datetime.utcnow() + d.timedelta(minutes=60)},os.environ['SECRET_KEY']).decode('utf-8')
             resp = make_response(jsonify({'refresh':'successful','dc_token':new_csrf_token}),200)
             resp.set_cookie('doc_access_token',value=new_access_token,httponly=True)
             return resp
