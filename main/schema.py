@@ -21,19 +21,11 @@ class GuideSchema(ma.Schema):
     class Meta:
         fields = ('name','done','info','time_lapse')
 
-class UserSchema(ma.Schema):
-    class Meta:
-        fields = ('id','profile_pic','travel_history','symptoms','days_left','guides','name','email','username','tel','country','state','address','age','sign_up_date','first_name','last_name','user_id')
-
-    symptoms = ma.Nested(SymptomSchema,many=True)
-    guides = ma.Nested(GuideSchema,many=True)
-
-user_schema = UserSchema()
-users_schema = UserSchema(many=True)
-
 class CommentSchema(ma.Schema):
     class Meta:
         fields = ('id','content','date_created','doctor_id','user_id')
+
+        #doc = ma.Nested(DoctorSchema)
 
 comment_schema = CommentSchema()
 comments_schema = CommentSchema(many=True)
@@ -48,3 +40,13 @@ doc_schema = DoctorSchema()
 docs_schema = DoctorSchema(many=True)
 
 
+class UserSchema(ma.Schema):
+    class Meta:
+        fields = ('id','med_state','remarks','profile_pic','symptoms','days_left','guides','name','email','username','tel','country','state','travel_history','address','age','sign_up_date','first_name','last_name','user_id')
+
+    symptoms = ma.Nested(SymptomSchema,many=True)
+    guides = ma.Nested(GuideSchema,many=True)
+    remarks = ma.Nested(CommentSchema,many=True)
+
+user_schema = UserSchema()
+users_schema = UserSchema(many=True)
