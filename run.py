@@ -15,7 +15,7 @@ if type(key) != str():
     os.environ['APP_KEY']
 email = app.config['CLIENT_EMAIL']
 
-cred = credentials.Certificate(
+"""cred = credentials.Certificate(
     {
         "type": "service_account",
         "project_id": "coveed-19",
@@ -28,9 +28,9 @@ cred = credentials.Certificate(
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
         "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-5pl26%40coveed-19.iam.gserviceaccount.com"
     }
-)
+)"""
 
-firebase_admin.initialize_app(cred)
+#firebase_admin.initialize_app(cred)
 
 @app.shell_context_processor
 def make_shell_context():

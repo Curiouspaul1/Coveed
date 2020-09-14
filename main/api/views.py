@@ -6,10 +6,12 @@ from flask_cors import cross_origin
 from tablib import Dataset
 from main.models import User,Symptoms,Specifics,Permission,Doctor
 from main.api.email_test import EmergencyMail
-from main.schema import user_schema,users_schema,symptom_schema,symptoms_schema,specific_schema,specifics_schema,comments_schema
-from firebase_admin import auth
+from main.schema import (
+user_schema,users_schema,symptom_schema,symptoms_schema,
+specific_schema,specifics_schema,comments_schema
+)
 import os,uuid,jwt,json
-from functools import wraps
+from main.auth.auth_helpers import login_required
 import datetime as d
 
 @api.after_request
@@ -20,51 +22,6 @@ def after_request(response):
     header['Access-Control-Allow-Methods'] = '*'
 
     return response
-
-"""@api.route('/login',methods=['POST'])
-def login():
-    data = request.get_json()
-    if 'access-token' in data:
-        token = data['access-token']
-        try:
-            decoded_token = auth.verify_id_token(token)
-            #decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
-        except Exception as e:
-            raise e
-            return make_response(jsonify({'error':'An error occured while trying to decode token'}),500)
-        uid = decoded_token['user_id']
-    # find user with id
-    user = User.query.filter_by(user_id=uid).first()
-    if user:
-        #session['user_id'] = user_id
-        return make_response(jsonify({'msg':'verified user successfully'}),200)
-    return make_response(jsonify({'error':'no user with such id found'}),400)"""
-
-def login_required(f):
-    @wraps(f)
-    def function(*args,**kwargs):
-        print(request.headers)
-        token = None
-        if 'access-token' in request.headers:
-            token = request.headers['access-token']
-            print(token)
-            decoded_token = auth.verify_id_token(token)
-            #decoded_token = jwt.decode(token,'secret', algorithms=['HS256'])
-        else:
-            return make_response(jsonify({'error':'token not found'}),404)
-        uid = decoded_token['uid']
-        # find user with id
-        current_user = User.query.filter_by(user_id=uid).first()
-        if not current_user:
-            return jsonify({'Error':'User not found'}),404
-        return f(current_user,*args,**kwargs)
-    return function
-        
-#@api.before_request
-#def before_request():
-#g.user = None
-#if 'user_id' in session:
-#g.user = session['user_id']
 
 # registration route
 @api.route('/add_profile',methods=['PUT'])

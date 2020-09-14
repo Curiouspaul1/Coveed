@@ -25,5 +25,8 @@ def __call__(config_object):
 
     from .doctors import doctor as doc_blueprint
     app.register_blueprint(doc_blueprint,url_prefix='/doctors')
+
+    from .auth import auth as auth_blueprint
+    app.register_blueprint(auth_blueprint,url_prefix='/auth')
     
     return app
