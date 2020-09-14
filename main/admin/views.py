@@ -1,5 +1,5 @@
 import json
-from flask import request,make_response,jsonify,current_app,json,session,g
+from flask import request,render_template,make_response,jsonify,current_app,json,session,g
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
 from main.models import User,Symptoms,Specifics,Doctor
@@ -40,8 +40,7 @@ def all_symptoms(user_id):
             'message':f'user id - {user_id} is invalid'
         },400
 
-@admin.route('/doctors')
-@admin.route('/remove_doc/<doctor_id>',methods=['DELETE'])
+@admin.route('/doctors/<doctor_id>',methods=['DELETE'])
 def removedoc(doctor_id):
     if request.method == 'DELETE':
         # fetch doc object
@@ -58,6 +57,10 @@ def removedoc(doctor_id):
                 'status':'Error',
                 'message':f'user id - {user_id} is invalid'
             },400
-    if request.method == 'GET' :
-        return render_template('listdocs.html')
+  
+@admin.route('/doctors')
+def doctors():
+    if request.method == 'GET':
+        docs = Doctor.query.all()
+        return render_template('listdocs.html',docs=docs)
 

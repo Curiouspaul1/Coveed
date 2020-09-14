@@ -10,4 +10,8 @@ coveed-dev.sqlite-journal
 *.sqlite
 *.stackdump
 .vs/
+node_modules/
+*yarn.lock
+*tailwind.config.json
+package.json
 

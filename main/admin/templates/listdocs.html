@@ -3,9 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link rel="stylesheet" href="{{url_for('admin.static',filename='css/main.css')}}">
+    <title></title>
 </head>
 <body>
     
+    <div class="container">
+        <div class="grid grid-cols-3 gap-3">
+            {% for doc in docs %}
+                <div class="py-5 px-10 bg-gray-300 rounded text-2xl text-blue-500">
+                    {{doc.first_name}} {{doc.last_name}}
+                    <p class="text-gray-700 text-xl">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facere facilis distinctio explicabo
+                    </p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 </body>
 </html>
