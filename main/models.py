@@ -165,8 +165,8 @@ class Guides(db.Model):
 
 class Doctor(db.Model):
     id = db.Column(db.Integer,primary_key=True,nullable=False)
-    doc_id = db.Column(db.String(200))
-    doc_pass = db.Column(db.String(10))
+    doc_id = db.Column(db.String(200),unique=True)
+    doc_pass = db.Column(db.String(10),unique=True)
     first_name = db.Column(db.String(50))
     last_name = db.Column(db.String(50))
     qualification = db.Column(db.String(200))
@@ -189,3 +189,17 @@ class Comments(db.Model):
     date_created = db.Column(db.DateTime())
     doctor_id = db.Column(db.Integer,db.ForeignKey('doctor.id'))
     user_id = db.Column(db.Integer,db.ForeignKey('user.id'))
+
+class Admin(db.Model):
+    id = db.Column(db.Integer,primary_key=True,nullable=False)
+    admin_id = db.Column(db.String(200),nullable=False,unique=True)
+    admin_pass = db.Column(db.String(200),nullable=False,unique=True)
+
+    def genId(self):
+        d_id = self.first_name[0:3] + '00' + str(Admin.query.all().index(self)+1)
+        self.admin_id = d_id
+
+    def __init__(self,**kwargs):
+        super(Admin,self).__init__(**kwargs)
+        self.role = Role.query.filter_by(name='ADMIN').first()
+

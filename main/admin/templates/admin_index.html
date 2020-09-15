@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coveed | Admin</title>
+    <link rel="stylesheet" href="{{url_for('admin.static',filename='css/main.css')}}">
+</head>
+<body class="bg-gray-300">
+    <div class="py-16 px-20 bg-gray-100 border-2 m-auto mt-40 rounded w-2/5 shadow-2xl">
+        <h1 class="text-4xl text-blue-500 mb-10" id="headtext">Sign In</h1>
+        <input id="admin_id" class="py-5 mb-10 px-10 bg-gray-300 border-blue-300 rounded text-2xl" type="text" name="admin_id" placeholder="Enter Admin ID...">
+        <input id="admin_pass" class="py-5 px-10 bg-gray-300 border-blue-300 rounded text-2xl" type="password" name="admin_pass" placeholder="Enter Admin Pass...">
+        <button class="py-2 px-4 mt-5 mb-16 border-2 rounded-md hover:bg-blue-300 bg-blue-400 text-2xl text-white">Proceed</button>
+        <div>
+            <span class="border-2 hover:text-gray-800 rounded-md border-green-200 text-gray-600 hover:cursor-pointer text-2xl p-1" id="sign-up">Create Admin Account</span>
+        </div>
+    </div>
+    <script src="{{url_for('admin.static',filename='scripts/login.js')}}"></script>
+</body>
+</html>
+
+

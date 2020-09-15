@@ -1,9 +1,32 @@
 import json
-from flask import request,render_template,make_response,jsonify,current_app,json,session,g
+from flask import (
+    request,render_template,make_response,jsonify,
+    current_app,json,session,g
+)
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
-from main.models import User,Symptoms,Specifics,Doctor
+from main.models import User,Symptoms,Specifics,Doctor,Admin
 from . import admin
+from bcrypt import hashpw,checkpw
+import os
+
+@admin.route('/')
+def index():
+    return render_template('admin_index.html')
+
+@admin.route('/register',methods=['POST'])
+def register():
+    data = request.get_json()
+    if not data:
+        resp,status_code = {'status':'Error','message':'No data sent'},400
+    password = hashpw(os.getenv('APP_KEY'),data['admin_pass'])
+    new_admin = Admin(admin_pass=password)
+    db.session.add(new_admin)
+    new_admin.genId()
+    try:
+        db.session.commit()
+    except IntegrityError:
+        resp,status_code = {'status':'Error','message':'Admin credential already exists'},400
 
 @admin.route('/delete_users',methods=['DELETE'])
 def delete_users():
@@ -63,4 +86,5 @@ def doctors():
     if request.method == 'GET':
         docs = Doctor.query.all()
         return render_template('listdocs.html',docs=docs)
+
 

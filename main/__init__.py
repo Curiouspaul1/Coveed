@@ -13,7 +13,13 @@ def __call__(config_object):
 
     db.init_app(app)
     ma.init_app(app)
-    cors.init_app(app, resources={r"/api/*":{"origins":"*"},r"/doctors/*":{"origins":"*"}},supports_credentials=True)
+    cors.init_app(app, resources={
+        r"/api/*":{"origins":"*"},
+        r"/doctors/*":{"origins":"*"},
+        r"/admin/*":{"origins":"*"},
+        r"/auth/*":{"origins":"*"}},
+        supports_credentials=True
+    )
     #logging.getLogger('flask_cors').level = logging.DEBUG
 
     # register blurprint
