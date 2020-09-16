@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from main.extensions import db
 from main.models import User,Symptoms,Specifics,Doctor,Admin
 from . import admin
-from bcrypt import hashpw,checkpw
+from bcrypt import hashpw,checkpw,gensalt
 import os
 
 @admin.route('/')
@@ -15,18 +15,18 @@ def index():
     return render_template('admin_index.html')
 
 @admin.route('/register',methods=['POST'])
-def register():
-    data = request.get_json()
-    if not data:
-        resp,status_code = {'status':'Error','message':'No data sent'},400
-    password = hashpw(os.getenv('APP_KEY'),data['admin_pass'])
-    new_admin = Admin(admin_pass=password)
-    db.session.add(new_admin)
+def signup():
+    data = request.get_json(force=True)
+    pass_ = hashpw(str.encode(data['admin_pass']),gensalt())
+    new_admin = Admin(admin_pass=pass_)
     new_admin.genId()
+    db.session.add(new_admin)
     try:
         db.session.commit()
+        resp,status_code = {'status':'Success','message':'New Admin created!'},200
     except IntegrityError:
-        resp,status_code = {'status':'Error','message':'Admin credential already exists'},400
+        resp,status_code = {'status':'Error','message':'Admin credentials already exist'},402
+    return resp,status_code
 
 @admin.route('/delete_users',methods=['DELETE'])
 def delete_users():

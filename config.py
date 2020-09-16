@@ -13,7 +13,7 @@ class Config:
     CLIENT_EMAIL = os.environ['FIREBASE_CLIENT_EMAIL']
 
 class DevelopmentConfig(Config):
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir,'coved-dev.sqlite') or os.getenv('DEV_URI')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir,'Sdev.sqlite') or os.getenv('DEV_URI')
     DEBUG = True
     #CRED = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
 

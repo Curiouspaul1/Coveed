@@ -192,11 +192,11 @@ class Comments(db.Model):
 
 class Admin(db.Model):
     id = db.Column(db.Integer,primary_key=True,nullable=False)
-    admin_id = db.Column(db.String(200),nullable=False,unique=True)
-    admin_pass = db.Column(db.String(200),nullable=False,unique=True)
+    admin_id = db.Column(db.String(50),unique=True)
+    admin_pass = db.Column(db.String(50),unique=True)
 
     def genId(self):
-        d_id = self.first_name[0:3] + '00' + str(Admin.query.all().index(self)+1)
+        d_id = 'Admin' + '00' + str(len(Admin.query.all())+1)
         self.admin_id = d_id
 
     def __init__(self,**kwargs):

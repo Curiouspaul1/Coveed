@@ -76,7 +76,7 @@ def admin():
         resp,status_code = {'status':'Error','message':f'user with id {_id}'},404
     pass_ = admin.admin_pass
     # compare password hashes
-    if checkpw(pass_,_pass):
+    if checkpw(str.encode(_pass),pass_):
         # Xss Tokens
         key = os.environ['APP_KEY']
         access_token = jwt.encode({'admin_id':admin.admin_id,'exp':d.datetime.utcnow() + d.timedelta(minutes=60)},key)
@@ -88,8 +88,8 @@ def admin():
         print(csrf_access_token,csrf_refresh_token)
         resp = make_response({'login':True,'dc_token':str(csrf_access_token),'dc_refresh_token':str(csrf_refresh_token)},200)
         #XSS Cookies
-        resp.set_cookie('doc_access_token',value=access_token,httponly=True,samesite='None',secure=True)
-        resp.set_cookie('doc_refresh_token',value=refresh_token,httponly=True,samesite='None',secure=True)
+        resp.set_cookie('admin_access_token',value=access_token,httponly=True,samesite='None',secure=True)
+        resp.set_cookie('admin_refresh_token',value=refresh_token,httponly=True,samesite='None',secure=True)
         #CSRF Cookies
         return resp,200
     else:
