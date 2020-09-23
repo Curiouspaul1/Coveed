@@ -50,7 +50,7 @@ def doc_login_required(f):
     author : Curiouspaul
     """
     @wraps(f)
-    def function(*args,**kwargs):
+    def function(*args, **kwargs):
         token = None
         if 'doc_access_token' in request.cookies and 'doc_csrf_access_token' in request.headers:
             token = request.cookies.get('doc_access_token')

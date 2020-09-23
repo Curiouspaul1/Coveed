@@ -25,7 +25,7 @@ def signup():
     try:
         db.session.commit()
         resp, status_code = {
-                'status': 'Success', 
+                'status': 'Success',
                 'message': 'New Admin created!'
             }, 200
     except IntegrityError:

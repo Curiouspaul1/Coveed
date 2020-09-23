@@ -16,9 +16,18 @@ function SignIn(data)
         method:'POST',
         headers:{'content-type': 'application/json'},
     }).then(resp => {
-        return resp.json()
+        if (resp.status == 200)
+        {
+            return resp.json()
+        }
     }).then(resp => {
-        console.log(resp)
+        fetch('http://localhost:5000/admin/users',{
+            headers:{
+                'content-type': 'application/json',
+                'admin_csrf_access_token':resp['adminc_token']
+            },
+            method:'GET'
+        })
     }).catch((err) => console.log(err));
 }
 

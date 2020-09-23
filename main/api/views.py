@@ -1,18 +1,22 @@
 from . import api
-from flask import render_template,request,make_response,jsonify,current_app,json,session,g,request
+from flask import (
+    render_template, request, make_response, jsonify,
+    current_app, request
+)
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
 from flask_cors import cross_origin
 from tablib import Dataset
-from main.models import User,Symptoms,Specifics,Permission,Doctor
+from main.models import User, Symptoms, Specifics, Permission, Doctor
 from main.api.email_test import EmergencyMail
 from main.schema import (
-user_schema,users_schema,symptom_schema,symptoms_schema,
-specific_schema,specifics_schema,comments_schema
+    user_schema, users_schema, symptom_schema, symptoms_schema,
+    specific_schema, specifics_schema, comments_schema
 )
-import os,uuid,jwt,json
+import os, uuid, jwt, json
 from main.auth.auth_helpers import login_required
 import datetime as d
+
 
 @api.after_request
 def after_request(response):
@@ -22,6 +26,7 @@ def after_request(response):
     header['Access-Control-Allow-Methods'] = '*'
 
     return response
+
 
 # registration route
 @api.route('/add_profile',methods=['PUT'])
@@ -38,10 +43,12 @@ def add_profile(current_user):
     age = payload['age']
     travel_history = payload['travel_history']
     countryVisited = payload['countryVisited']
-    user.email,user.countryVisited,user.tel,user.country,user.state,user.address,user.age = email,countryVisited,tel,country,state,address,age
+    user.email, user.countryVisited, user.tel, user.country,
+    user.state, user.address, user.age = email, countryVisited, tel, country,
+    state, address, age
     db.session.commit()
 
-    return make_response(jsonify({"msg":"Profile updated successfully"}),200)
+    return make_response(jsonify({"msg": "Profile updated successfully"}),200)
 
 @api.route('/add_symptoms',methods=['POST'])
 @login_required
@@ -106,7 +113,6 @@ def fetchsymptoms(current_user):
         user = User.query.filter_by(user_id=current_user.user_id).first()
         result = user.symptoms
         # write data to json file for graph generation
-        import os,json
         data = open(os.path.join(os.getcwd(),'data.json'),'w')
         data.write(json.dumps(symptoms_schema.dump(result)))
         return jsonify(symptoms_schema.dump(result)),200
