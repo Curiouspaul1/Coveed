@@ -15,6 +15,10 @@ function SignIn(data)
         body:JSON.stringify(data),
         method:'POST',
         headers:{'content-type': 'application/json'},
+    }).then(resp => {
+        return resp.json()
+    }).then(resp => {
+        console.log(resp)
     }).catch((err) => console.log(err));
 }
 
@@ -25,6 +29,10 @@ function SignUp(data)
         body:JSON.stringify(data),
         method:'POST',
         headers:{'content-type': 'application/json'},
+    }).then(resp => {
+        return resp.json()
+    }).then(resp => {
+        console.log(resp)
     }).catch((err) => console.log(err));
 }
 
@@ -45,7 +53,7 @@ signin.addEventListener('click',function (){
 
 sign_up.addEventListener('click',function (){
     admin_id.style.display = 'None';
-    sign_up.innerText = 'Login Instead';
+    sign_up.style.display = 'None';
     text.innerText = 'SignUp';
     signin.style.display = 'None';
     let switch_ = document.getElementById('switch');

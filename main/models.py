@@ -2,6 +2,7 @@ from main import db,ma
 import datetime as d
 from flask import current_app
 
+
 class User(db.Model):
     id = db.Column(db.Integer,nullable=False,primary_key=True)
     first_name = db.Column(db.String(100))
@@ -59,6 +60,7 @@ class User(db.Model):
 
 #class Vitals(db.Model):
 
+
 class Symptoms(db.Model):
     id = db.Column(db.Integer,nullable=False,primary_key=True)
     cough = db.Column(db.Boolean,default=False)
@@ -70,6 +72,7 @@ class Symptoms(db.Model):
     user_id = db.Column(db.Integer,db.ForeignKey('user.id'))
     specifics = db.relationship('Specifics',backref='symptom',uselist=False)
 
+
 class Specifics(db.Model):
     id = db.Column(db.Integer,primary_key=True,nullable=False)
     cough_degree = db.Column(db.String(50))
@@ -78,11 +81,13 @@ class Specifics(db.Model):
     other_degree = db.Column(db.String(50))
     symptom_id = db.Column(db.Integer,db.ForeignKey('symptoms.id'))
 
+
 class Permission:
     ADD_SYMPTOMS = 1
     CONTACT_HEALTHCARE = 2
     ADMINISTER = 4
     ADMIN = 8
+
 
 class Role(db.Model):
     id = db.Column(db.Integer,primary_key=True,nullable=False)

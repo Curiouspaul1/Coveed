@@ -1,8 +1,6 @@
-import os
-import tempfile
-
 import pytest
 from main import __call__
+
 
 @pytest.fixture(scope='module')
 def test_client():
