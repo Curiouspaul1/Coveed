@@ -1,7 +1,9 @@
 # Coveed BackEnd Service
 This is the backend for the coveed project see front end here https://github.com/stanislaus-onwuka/kill-covid-frontend.
 
-``Coveed is a remote health guide that helps patients (who can be classified as patients with mild symptoms of the Covid19 infection) in their self-isolation routine.``
+``
+Coveed is a tool, that helps health workers monitor the health status of covid19 patients while allowing patients to create a health profile that health workers rely on for review and medical recommendations/advice. It also features, an emergency failsafe for instances where patients' health deteriorates.
+``
 
 # Who can use Coveed
 ✅ tested patients (with minimal symptoms) who wish to self isolate.
