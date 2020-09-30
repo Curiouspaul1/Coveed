@@ -127,7 +127,7 @@ def admin():
     # fetch credentials
     _id = request.form['_id']
     _pass = request.form['_pass']
-    if not _id or _pass:
+    if not _id or not _pass:
         resp, status_code = {
             'status': 'Error',
             'message': 'Credentials missing please fill form properly'
