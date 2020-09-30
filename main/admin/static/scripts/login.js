@@ -11,23 +11,15 @@ signup.style.display = 'None';
 
 function SignIn(data)
 {
+    console.log(data);
     fetch('http://localhost:5000/auth/admin',{
         body:JSON.stringify(data),
         method:'POST',
         headers:{'content-type': 'application/json'},
     }).then(resp => {
-        if (resp.status == 200)
-        {
-            return resp.json()
-        }
+        return resp.json()
     }).then(resp => {
-        fetch('http://localhost:5000/admin/users',{
-            headers:{
-                'content-type': 'application/json',
-                'admin_csrf_access_token':resp['adminc_token']
-            },
-            method:'GET'
-        })
+        console.log(resp)
     }).catch((err) => console.log(err));
 }
 
@@ -49,7 +41,7 @@ function SignUp(data)
 signin.addEventListener('click',function (){
     admin_pass = document.getElementById('admin_pass');
     admin_id = document.getElementById('admin_id');
-    if (admin_id)
+    /*if (admin_id)
     {
         let data = {
             '_pass':admin_pass.value,
@@ -57,7 +49,7 @@ signin.addEventListener('click',function (){
         }
         console.log(data);
         SignIn(data);
-    }
+    }*/
 });
 
 sign_up.addEventListener('click',function (){
@@ -71,10 +63,10 @@ sign_up.addEventListener('click',function (){
     
     signup.addEventListener('click',function (){
         admin_pass = document.getElementById('admin_pass');
-        data = {
+        /*data = {
             'admin_pass':admin_pass.value,
         }
-        SignUp(data);
+        SignUp(data);*/
     });
 })
 

@@ -1,9 +1,9 @@
-from flask import request,make_response,jsonify
-from main.models import Doctor
+from flask import request, make_response, jsonify, session
+from main.models import Doctor, Admin
 from firebase_admin import auth
 from functools import wraps
-import re,os,jwt
-from jwt.exceptions import ExpiredSignatureError,InvalidSignatureError
+import re, os,jwt
+from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError
 
 ########## Patient Auth Helper ##########
 
@@ -29,7 +29,7 @@ def login_required(f):
         current_user = User.query.filter_by(user_id=uid).first()
         if not current_user:
             return jsonify({'Error':'User not found'}),404
-        return f(current_user,*args,**kwargs)
+        return f(current_user, *args, **kwargs)
     return function
 
 ############ Doctor Auth Helpers ###############
@@ -92,7 +92,7 @@ def admin_login_required(f):
     @wraps(f)
     def function(*args, **kwargs):
         token=None
-        print(request.cookies.get('admin_access_token'))
+        print(session['access_token'])
         if 'admin_access_token' in request.cookies and 'admin_csrf_access_token' in request.headers:
             token = request.cookies.get('admin_access_token')
             try:

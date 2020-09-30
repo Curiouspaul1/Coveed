@@ -1,10 +1,11 @@
 from flask import (
-    request, render_template, make_response, jsonify
+    request, render_template, make_response, jsonify, redirect, url_for
 )
+import flask
 from sqlalchemy.exc import IntegrityError
 from main.extensions import db
 from main.models import User, Symptoms, Doctor, Admin
-from main.schema import users_schema, symptoms_schema
+from main.schema import symptoms_schema
 from main.auth.auth_helpers import admin_login_required
 from . import admin
 from bcrypt import hashpw, gensalt
@@ -36,14 +37,15 @@ def signup():
     return resp, status_code
 
 
-@admin.route('/delete_users', methods=['DELETE'])
-@admin_login_required
-def delete_users(admin):
+@admin.route('/delete_users', methods=['GET'])
+# @admin_login_required
+def delete_users():
     users = User.query.all()
     for i in users:
         db.session.delete(i)
         db.session.commit()
-    return make_response("Deleted users"), 200
+    # return make_response("Deleted users"), 200
+    return redirect(url_for('admin.all_users'))
 
 
 @admin.route('/delete_symptoms', methods=['DELETE'])
@@ -56,11 +58,17 @@ def delete_symptoms(admin):
     return make_response("Cleared symptoms"), 200
 
 
+@admin.route('/redirect')
+@admin_login_required
+def dash(admin):
+    return redirect(url_for('admin.all_users'))
+
+
 @admin.route('/users', methods=['GET'])
 @admin_login_required
 def all_users(admin):
     users = User.query.all()
-    return jsonify(users_schema.dump(users))
+    return render_template("listdocs.html", users=users)
 
 
 @admin.route('/symptoms/<user_id>', methods=['GET'])
