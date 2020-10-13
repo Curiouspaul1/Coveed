@@ -1,4 +1,7 @@
-from main.models import User,Symptoms,Specifics ,Guides,Role
+from main.models import (
+    User, Symptoms,
+    Specifics, Guides, Role
+)
 from main.extensions import ma
 # schemas
 class SpecificSchema(ma.Schema):
@@ -7,6 +10,7 @@ class SpecificSchema(ma.Schema):
 
 specific_schema = SpecificSchema()
 specifics_schema = SpecificSchema(many=True)
+
 
 class SymptomSchema(ma.Schema):
     class Meta:
@@ -17,15 +21,18 @@ class SymptomSchema(ma.Schema):
 symptom_schema = SymptomSchema()
 symptoms_schema = SymptomSchema(many=True)
 
+
 class GuideSchema(ma.Schema):
     class Meta:
         fields = ('name','done','info','time_lapse')
+
 
 class CommentSchema(ma.Schema):
     class Meta:
         fields = ('id','content','date_created','doctor_id','user_id')
 
         #doc = ma.Nested(DoctorSchema)
+
 
 comment_schema = CommentSchema()
 comments_schema = CommentSchema(many=True)
@@ -47,6 +54,7 @@ class UserSchema(ma.Schema):
     symptoms = ma.Nested(SymptomSchema,many=True)
     guides = ma.Nested(GuideSchema,many=True)
     remarks = ma.Nested(CommentSchema,many=True)
+
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)

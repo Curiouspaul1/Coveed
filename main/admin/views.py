@@ -18,8 +18,8 @@ def index():
 
 @admin.route('/register', methods=['POST'])
 def signup():
-    data = request.get_json(force=True)
-    pass_ = hashpw(str.encode(data['admin_pass']), gensalt())
+    data = request.form
+    pass_ = hashpw(str.encode(data['_pass']), gensalt())
     new_admin = Admin(admin_pass=pass_)
     new_admin.genId()
     db.session.add(new_admin)
