@@ -155,6 +155,7 @@ def promote(current_user):
 def doc_comments(current_user):
     comments = current_user.remarks
     data = comments_schema.dump(comments)
+    print(data)
     for i in data:
         doc = Doctor.query.filter_by(id=i['doctor_id']).first()
         i['first_name'],i['last_name'],i['qualification'] = doc.first_name,doc.last_name,doc.qualification
