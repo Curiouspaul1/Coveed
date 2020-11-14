@@ -113,10 +113,8 @@ def signup():
 @api.route('/getuser')
 @login_required
 def getuser(current_user):
-    user = User.query.filter_by(user_id=current_user.user_id).first()
-    if not user:
-        return make_response(jsonify({'msg':'No such user found'}),404)
-    return user_schema.jsonify(user)
+    print(user_schema.jsonify(current_user))
+    return user_schema.jsonify(current_user)
 
 @api.route('/fetch_user_symptoms')
 @login_required
