@@ -113,7 +113,7 @@ def signup():
 @api.route('/getuser')
 @login_required
 def getuser(current_user):
-    print(user_schema.jsonify(current_user))
+    print(user_schema.dump(current_user))
     return user_schema.jsonify(current_user)
 
 @api.route('/fetch_user_symptoms')
